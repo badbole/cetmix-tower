@@ -33,23 +33,26 @@
                                 attrs="{'invisible': [('action', '!=', 'ssh_command')]}"
                             />
                         </group>
-
-
+                        <group>
+                            <field name="action" />
+                            <field
+                                    name="flight_plan_id"
+                                    string="Flight Plan"
+                                    attrs="{'invisible': [('action', '!=', 'plan')]}"
+                                />
+                            <field
+                                name="file_template_id"
+                                string="File Template"
+                                attrs="{'invisible': [('action', '!=', 'file_using_template')]}"
+                            />
+                        </group>
                     </group>
                     <group>
                     <field name="condition" widget="ace" options="{'mode': 'python'}" />
             </group>
                     <notebook>
-                        <page name="preview" string="Command Preview">
-                            <group>
-                                <field name="action" />
-                                <field
-                                    name="flight_plan_id"
-                                    string="Flight Plan"
-                                    attrs="{'invisible': [('action', '!=', 'plan')]}"
-                                />
-                            </group>
-                                <field
+                        <page name="preview" string="Preview">
+                            <field
                                 name="command_code"
                                 attrs="{'invisible': [('action', 'not in', ['ssh_command', 'python_code'])]}"
                             />
@@ -58,7 +61,7 @@
                                 string="Template Code"
                                 attrs="{'invisible': [('action', '!=', 'file_using_template')]}"
                             />
-                                <field
+                            <field
                                 name="plan_line_ids"
                                 string="Flight Plan Lines"
                                 attrs="{'invisible': [('action', '!=', 'plan')]}"
