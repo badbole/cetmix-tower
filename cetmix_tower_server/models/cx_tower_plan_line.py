@@ -47,12 +47,6 @@ class CxTowerPlanLine(models.Model):
     command_code = fields.Text(
         comodel_name="cx.tower.command", string="Code", readonly=True
     )
-    plan_line_ids = fields.One2many(
-        comodel_name="cx.tower.plan.line",
-        inverse_name="command_id",
-        string="Plan Lines",
-        readonly=True,
-    )
     action = fields.Selection(related="command_id.action", readonly=True)
     tag_ids = fields.Many2many(related="command_id.tag_ids", readonly=True)
     access_level = fields.Selection(

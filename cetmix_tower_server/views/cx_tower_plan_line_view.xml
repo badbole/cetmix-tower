@@ -43,10 +43,6 @@
                                     name="command_code"
                                     attrs="{'invisible': [('action', 'not in', ['ssh_command', 'python_code'])]}"
                                 />
-                                <field
-                                    name="plan_line_ids"
-                                    attrs="{'invisible': [('action', '!=', 'plan')]}"
-                                />
                             </group>
                         </page>
                         <page name="actions" string="Post Run Actions">
