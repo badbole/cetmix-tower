@@ -45,7 +45,10 @@ class CxTowerPlanLine(models.Model):
         " If empty next command will be executed",
     )
     command_code = fields.Text(
-        comodel_name="cx.tower.command", string="Code", readonly=True
+        related="command_id.code",
+        comodel_name="cx.tower.command",
+        string="Code",
+        readonly=True,
     )
     action = fields.Selection(related="command_id.action", readonly=True)
     tag_ids = fields.Many2many(related="command_id.tag_ids", readonly=True)
@@ -68,6 +71,23 @@ class CxTowerPlanLine(models.Model):
         compute="_compute_variable_ids",
         store=True,
     )
+    plan_line_ids = fields.One2many(
+        comodel_name="cx.tower.plan.line",
+        compute="_compute_plan_line_ids",
+        string="Related Flight Plan Lines",
+        # readonly=True,
+    )
+
+    @api.depends("command_id", "command_id.flight_plan_id", "action")
+    def _compute_plan_line_ids(self):
+        """
+        Compute the related plan lines if the action is "plan".
+        """
+        for line in self:
+            if line.action == "plan" and line.command_id.flight_plan_id:
+                line.plan_line_ids = line.command_id.flight_plan_id.line_ids
+            else:
+                line.plan_line_ids = False
 
     @api.depends("condition")
     def _compute_variable_ids(self):

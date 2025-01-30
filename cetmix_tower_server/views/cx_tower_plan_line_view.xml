@@ -23,10 +23,14 @@
                                 readonly="1"
                                 attrs="{'invisible': [('note', '=', False)]}"
                             />
-                            <field name="use_sudo" />
+                            <field
+                                name="use_sudo"
+                                attrs="{'invisible': [('action', '!=', 'ssh_command')]}"
+                            />
                             <field
                                 name="path"
                                 placeholder="e.g. /such/much/{{ path }}, overrides command path"
+                                attrs="{'invisible': [('action', '!=', 'ssh_command')]}"
                             />
                         </group>
 
@@ -42,6 +46,13 @@
                                 <field
                                     name="command_code"
                                     attrs="{'invisible': [('action', 'not in', ['ssh_command', 'python_code'])]}"
+                                />
+                            </group>
+                            <group attrs="{'invisible': [('action', '!=', 'plan')]}">
+                                <field
+                                    name="plan_line_ids"
+                                    widget="many2many_tags"
+                                    string="Flight Plan Lines"
                                 />
                             </group>
                         </page>
