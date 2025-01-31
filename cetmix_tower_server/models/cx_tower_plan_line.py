@@ -28,13 +28,12 @@ class CxTowerPlanLine(models.Model):
     plan_line_ids = fields.One2many(
         comodel_name="cx.tower.plan.line",
         related="plan_id.line_ids",
-        string="Related Flight Plan Lines",
+        string="Flight Plan Lines",
         readonly=True,
     )
     flight_plan_id = fields.Many2one(
         comodel_name="cx.tower.plan",
         related="command_id.flight_plan_id",
-        string="Related Flight Plan",
         store=True,
         readonly=True,
     )
@@ -60,7 +59,6 @@ class CxTowerPlanLine(models.Model):
     command_code = fields.Text(
         related="command_id.code",
         comodel_name="cx.tower.command",
-        string="Code",
         readonly=True,
     )
     action = fields.Selection(related="command_id.action", readonly=True)
@@ -87,7 +85,6 @@ class CxTowerPlanLine(models.Model):
     file_template_id = fields.Many2one(
         comodel_name="cx.tower.file.template",
         related="command_id.file_template_id",
-        string="Related File Template",
         store=True,
         readonly=True,
     )
