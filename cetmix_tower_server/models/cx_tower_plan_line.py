@@ -25,15 +25,15 @@ class CxTowerPlanLine(models.Model):
         auto_join=True,
         ondelete="cascade",
     )
-    related_plan_line_ids = fields.One2many(
+    plan_line_ids = fields.One2many(
         comodel_name="cx.tower.plan.line",
-        compute="_compute_related_plan_line_ids",
+        related="plan_id.line_ids",
         string="Related Flight Plan Lines",
         readonly=True,
     )
-    related_flight_plan_id = fields.Many2one(
+    flight_plan_id = fields.Many2one(
         comodel_name="cx.tower.plan",
-        compute="_compute_related_flight_plan_id",
+        related="command_id.flight_plan_id",
         string="Related Flight Plan",
         store=True,
         readonly=True,
@@ -84,49 +84,13 @@ class CxTowerPlanLine(models.Model):
         compute="_compute_variable_ids",
         store=True,
     )
-    related_file_template_id = fields.Many2one(
+    file_template_id = fields.Many2one(
         comodel_name="cx.tower.file.template",
-        compute="_compute_file_template_id",
+        related="command_id.file_template_id",
         string="Related File Template",
         store=True,
         readonly=True,
     )
-
-    @api.depends("command_id", "command_id.flight_plan_id", "action")
-    def _compute_related_plan_line_ids(self):
-        """
-        Compute the related plan lines if the action is "plan".
-        """
-        for line in self:
-            if line.action == "plan" and line.command_id.flight_plan_id:
-                line.related_plan_line_ids = line.command_id.flight_plan_id.line_ids
-            else:
-                line.related_plan_line_ids = False
-
-    @api.depends("command_id", "action")
-    def _compute_related_flight_plan_id(self):
-        """
-        Compute related Flight Plan ID if the command action is "plan".
-        """
-        for line in self:
-            if line.action == "plan" and line.command_id.flight_plan_id:
-                line.related_flight_plan_id = line.command_id.flight_plan_id
-            else:
-                line.related_flight_plan_id = False
-
-    @api.depends("command_id", "action")
-    def _compute_file_template_id(self):
-        """
-        Compute related File Template ID if the command action is "file_using_template".
-        """
-        for line in self:
-            if (
-                line.action == "file_using_template"
-                and line.command_id.file_template_id
-            ):
-                line.related_file_template_id = line.command_id.file_template_id
-            else:
-                line.related_file_template_id = False
 
     @api.depends("condition")
     def _compute_variable_ids(self):
