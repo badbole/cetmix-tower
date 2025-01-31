@@ -58,7 +58,6 @@ class CxTowerPlanLine(models.Model):
     )
     command_code = fields.Text(
         related="command_id.code",
-        comodel_name="cx.tower.command",
         readonly=True,
     )
     action = fields.Selection(related="command_id.action", readonly=True)
@@ -85,7 +84,6 @@ class CxTowerPlanLine(models.Model):
     file_template_id = fields.Many2one(
         comodel_name="cx.tower.file.template",
         related="command_id.file_template_id",
-        store=True,
         readonly=True,
     )
 

@@ -53,12 +53,37 @@
                             >
                                 <field name="file_template_id" string="File Template" />
                             </group>
-                            <group attrs="{'invisible': [('action', '!=', 'plan')]}">
+                                <group
+                                attrs="{'invisible': [('action', '!=', 'plan')]}"
+                            >
                                 <field name="flight_plan_id" string="Flight Plan" />
-                                <field
-                                    name="plan_line_ids"
-                                    string="Flight Plan Lines"
-                                />
+                                <field name="plan_line_ids" string="Flight Plan Lines">
+                                    <tree>
+                                        <field name="sequence" widget="handle" />
+                                        <field name="name" />
+                                        <field name="reference" optional="hide" />
+                                        <field
+                                            name="action"
+                                            optional="show"
+                                            groups="cetmix_tower_server.group_manager"
+                                        />
+                                        <field
+                                            name="tag_ids"
+                                            optional="show"
+                                            widget="many2many_tags"
+                                            groups="cetmix_tower_server.group_manager"
+                                            options="{'color_field': 'color'}"
+                                        />
+                                        <field name="use_sudo" optional="show" />
+                                        <field name="path" optional="show" />
+                                        <field
+                                            name="condition"
+                                            widget="ace"
+                                            options="{'mode': 'python'}"
+                                            optional="show"
+                                        />
+                                    </tree>
+                                </field>
                             </group>
                         </page>
                         <page name="actions" string="Post Run Actions">
