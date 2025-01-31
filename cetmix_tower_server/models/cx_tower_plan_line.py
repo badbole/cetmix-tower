@@ -84,6 +84,13 @@ class CxTowerPlanLine(models.Model):
         compute="_compute_variable_ids",
         store=True,
     )
+    related_file_template_id = fields.Many2one(
+        comodel_name="cx.tower.file.template",
+        compute="_compute_file_template_id",
+        string="Related File Template",
+        store=True,
+        readonly=True,
+    )
 
     @api.depends("command_id", "command_id.flight_plan_id", "action")
     def _compute_related_plan_line_ids(self):
@@ -106,6 +113,20 @@ class CxTowerPlanLine(models.Model):
                 line.related_flight_plan_id = line.command_id.flight_plan_id
             else:
                 line.related_flight_plan_id = False
+
+    @api.depends("command_id", "action")
+    def _compute_file_template_id(self):
+        """
+        Compute related File Template ID if the command action is "file_using_template".
+        """
+        for line in self:
+            if (
+                line.action == "file_using_template"
+                and line.command_id.file_template_id
+            ):
+                line.related_file_template_id = line.command_id.file_template_id
+            else:
+                line.related_file_template_id = False
 
     @api.depends("condition")
     def _compute_variable_ids(self):

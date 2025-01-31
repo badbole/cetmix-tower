@@ -48,6 +48,14 @@
                                     attrs="{'invisible': [('action', 'not in', ['ssh_command', 'python_code'])]}"
                                 />
                             </group>
+                            <group
+                                attrs="{'invisible': [('action', '!=', 'file_using_template')]}"
+                            >
+                                <field
+                                    name="related_file_template_id"
+                                    string="File Template"
+                                />
+                            </group>
                             <group attrs="{'invisible': [('action', '!=', 'plan')]}">
                                 <field
                                     name="related_flight_plan_id"
