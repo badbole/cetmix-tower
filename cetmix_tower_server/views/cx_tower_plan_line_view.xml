@@ -44,47 +44,51 @@
                             <group>
                                 <field name="action" />
                                 <field
-                                    name="command_code"
-                                    attrs="{'invisible': [('action', 'not in', ['ssh_command', 'python_code'])]}"
+                                    name="flight_plan_id"
+                                    string="Flight Plan"
+                                    attrs="{'invisible': [('action', '!=', 'plan')]}"
                                 />
                             </group>
-                            <group
+                                <field
+                                name="command_code"
+                                attrs="{'invisible': [('action', 'not in', ['ssh_command', 'python_code'])]}"
+                            />
+                                <field
+                                name="file_template_id"
+                                string="File Template"
                                 attrs="{'invisible': [('action', '!=', 'file_using_template')]}"
-                            >
-                                <field name="file_template_id" string="File Template" />
-                            </group>
-                                <group
+                            />
+                                <field
+                                name="plan_line_ids"
+                                string="Flight Plan Lines"
                                 attrs="{'invisible': [('action', '!=', 'plan')]}"
                             >
-                                <field name="flight_plan_id" string="Flight Plan" />
-                                <field name="plan_line_ids" string="Flight Plan Lines">
-                                    <tree>
-                                        <field name="sequence" widget="handle" />
-                                        <field name="name" />
-                                        <field name="reference" optional="hide" />
-                                        <field
-                                            name="action"
-                                            optional="show"
-                                            groups="cetmix_tower_server.group_manager"
-                                        />
-                                        <field
-                                            name="tag_ids"
-                                            optional="show"
-                                            widget="many2many_tags"
-                                            groups="cetmix_tower_server.group_manager"
-                                            options="{'color_field': 'color'}"
-                                        />
-                                        <field name="use_sudo" optional="show" />
-                                        <field name="path" optional="show" />
-                                        <field
-                                            name="condition"
-                                            widget="ace"
-                                            options="{'mode': 'python'}"
-                                            optional="show"
-                                        />
-                                    </tree>
-                                </field>
-                            </group>
+                                <tree>
+                                    <field name="sequence" widget="handle" />
+                                    <field name="name" />
+                                    <field name="reference" optional="hide" />
+                                    <field
+                                        name="action"
+                                        optional="show"
+                                        groups="cetmix_tower_server.group_manager"
+                                    />
+                                    <field
+                                        name="tag_ids"
+                                        optional="show"
+                                        widget="many2many_tags"
+                                        groups="cetmix_tower_server.group_manager"
+                                        options="{'color_field': 'color'}"
+                                    />
+                                    <field name="use_sudo" optional="show" />
+                                    <field name="path" optional="show" />
+                                    <field
+                                        name="condition"
+                                        widget="ace"
+                                        options="{'mode': 'python'}"
+                                        optional="show"
+                                    />
+                                </tree>
+                            </field>
                         </page>
                         <page name="actions" string="Post Run Actions">
                             <field name="action_ids">

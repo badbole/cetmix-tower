@@ -27,14 +27,13 @@ class CxTowerPlanLine(models.Model):
     )
     plan_line_ids = fields.One2many(
         comodel_name="cx.tower.plan.line",
-        related="plan_id.line_ids",
+        related="command_id.flight_plan_id.line_ids",
         string="Flight Plan Lines",
         readonly=True,
     )
     flight_plan_id = fields.Many2one(
         comodel_name="cx.tower.plan",
         related="command_id.flight_plan_id",
-        store=True,
         readonly=True,
     )
     command_id = fields.Many2one(comodel_name="cx.tower.command", required=True)

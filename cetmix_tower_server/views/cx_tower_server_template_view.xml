@@ -58,7 +58,7 @@
                                 <div class="col-12 pt8 o_kanban_primary_right">
                                     <div>
                                         <strong>Servers:</strong>
-                                        <span class="badge badge-primary">
+                                        <span>
                                             <t t-esc="record.server_count.value" />
                                         </span>
                                     </div>
