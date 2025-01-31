@@ -25,6 +25,19 @@ class CxTowerPlanLine(models.Model):
         auto_join=True,
         ondelete="cascade",
     )
+    related_plan_line_ids = fields.One2many(
+        comodel_name="cx.tower.plan.line",
+        compute="_compute_related_plan_line_ids",
+        string="Related Flight Plan Lines",
+        readonly=True,
+    )
+    related_flight_plan_id = fields.Many2one(
+        comodel_name="cx.tower.plan",
+        compute="_compute_related_flight_plan_id",
+        string="Related Flight Plan",
+        store=True,
+        readonly=True,
+    )
     command_id = fields.Many2one(comodel_name="cx.tower.command", required=True)
     note = fields.Text(related="command_id.note", readonly=True)
     path = fields.Char(
@@ -71,23 +84,28 @@ class CxTowerPlanLine(models.Model):
         compute="_compute_variable_ids",
         store=True,
     )
-    plan_line_ids = fields.One2many(
-        comodel_name="cx.tower.plan.line",
-        compute="_compute_plan_line_ids",
-        string="Related Flight Plan Lines",
-        # readonly=True,
-    )
 
     @api.depends("command_id", "command_id.flight_plan_id", "action")
-    def _compute_plan_line_ids(self):
+    def _compute_related_plan_line_ids(self):
         """
         Compute the related plan lines if the action is "plan".
         """
         for line in self:
             if line.action == "plan" and line.command_id.flight_plan_id:
-                line.plan_line_ids = line.command_id.flight_plan_id.line_ids
+                line.related_plan_line_ids = line.command_id.flight_plan_id.line_ids
             else:
-                line.plan_line_ids = False
+                line.related_plan_line_ids = False
+
+    @api.depends("command_id", "action")
+    def _compute_related_flight_plan_id(self):
+        """
+        Compute related Flight Plan ID if the command action is "plan".
+        """
+        for line in self:
+            if line.action == "plan" and line.command_id.flight_plan_id:
+                line.related_flight_plan_id = line.command_id.flight_plan_id
+            else:
+                line.related_flight_plan_id = False
 
     @api.depends("condition")
     def _compute_variable_ids(self):

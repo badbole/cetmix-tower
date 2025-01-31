@@ -50,8 +50,11 @@
                             </group>
                             <group attrs="{'invisible': [('action', '!=', 'plan')]}">
                                 <field
-                                    name="plan_line_ids"
-                                    widget="many2many_tags"
+                                    name="related_flight_plan_id"
+                                    string="Flight Plan"
+                                />
+                                <field
+                                    name="related_plan_line_ids"
                                     string="Flight Plan Lines"
                                 />
                             </group>
