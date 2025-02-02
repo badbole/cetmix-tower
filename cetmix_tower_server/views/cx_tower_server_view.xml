@@ -284,6 +284,14 @@
                                     />
                                     <field name="plan_delete_id" />
                                 </group>
+                                <group name="access">
+                                    <field
+                                        name="manager_ids"
+                                        widget="many2many_tags"
+                                        placeholder="managers who can modify this server"
+                                        options="{'no_create': True}"
+                                    />
+                                </group>
                                 <field name="note" placeholder="Put your notes here" />
                             </group>
                         </page>
