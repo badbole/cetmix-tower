@@ -105,7 +105,6 @@
         <field name="model">cx.tower.command.log</field>
         <field name="arch" type="xml">
             <tree
-                default_order="start_date desc, id desc"
                 decoration-danger="command_status not in [0, -20]"
                 decoration-info="is_running == True"
                 decoration-muted="command_status == -20"

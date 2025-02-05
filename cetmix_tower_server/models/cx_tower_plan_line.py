@@ -85,6 +85,11 @@ class CxTowerPlanLine(models.Model):
         related="command_id.file_template_id",
         readonly=True,
     )
+    file_template_code = fields.Text(
+        string="Template Code",
+        related="file_template_id.code",
+        readonly=True,
+    )
 
     @api.depends("condition")
     def _compute_variable_ids(self):

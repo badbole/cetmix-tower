@@ -53,9 +53,9 @@
                                 name="command_code"
                                 attrs="{'invisible': [('action', 'not in', ['ssh_command', 'python_code'])]}"
                             />
-                                <field
-                                name="file_template_id"
-                                string="File Template"
+                            <field
+                                name="file_template_code"
+                                string="Template Code"
                                 attrs="{'invisible': [('action', '!=', 'file_using_template')]}"
                             />
                                 <field
