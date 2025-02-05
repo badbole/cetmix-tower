@@ -6,9 +6,12 @@
         <field name="name">Tower Server: user visibility rule</field>
         <field name="model_id" ref="model_cx_tower_server" />
         <field name="groups" eval="[(4, ref('group_user'))]" />
-            <field
-            name="domain_force"
-        >[('message_partner_ids', 'in', [user.partner_id.id])]</field>
+        <!-- allow read if the user is in Users -->
+        <field name="domain_force">[('user_ids', 'in', [user.id])]</field>
+        <field name="perm_read" eval="1" />
+        <field name="perm_write" eval="0" />
+        <field name="perm_create" eval="0" />
+        <field name="perm_unlink" eval="0" />
     </record>
 
     <!-- Manager Access -->
@@ -19,9 +22,9 @@
         >cx.tower.server: Manager Read (if follower or in manager_ids)</field>
         <field name="model_id" ref="model_cx_tower_server" />
         <field name="groups" eval="[(4, ref('cetmix_tower_server.group_manager'))]" />
-        <!-- allow read if the user’s partner is among the followers OR if the user is in manager_ids -->
+        <!-- allow read if the user is in Users or Managers -->
         <field name="domain_force">
-            ['|', ('message_partner_ids', 'in', [user.partner_id.id]),
+            ['|', ('user_ids', 'in', [user.id]),
             ('manager_ids', 'in', [user.id])]
         </field>
         <field name="perm_read" eval="1" />

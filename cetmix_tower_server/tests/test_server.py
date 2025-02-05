@@ -85,10 +85,6 @@ COMMAND_RESULT = {
             }
         )
 
-        # Get group XML records
-        self.group_user = self.env.ref("cetmix_tower_server.group_user")
-        self.manager_group = self.env.ref("cetmix_tower_server.group_manager")
-
         # Create two test users that belong only to the "User" group.
         self.user1 = self.Users.create(
             {
@@ -106,22 +102,23 @@ COMMAND_RESULT = {
                 "groups_id": [(6, 0, [self.group_user.id])],
             }
         )
-
-        # Create two manager users.
-        manager1_vals = {
-            "name": "Manager 1",
-            "login": "manager1",
-            "email": "manager1@example.com",
-            "groups_id": [(6, 0, [self.manager_group.id])],
-        }
-        manager2_vals = {
-            "name": "Manager 2",
-            "login": "manager2",
-            "email": "manager2@example.com",
-            "groups_id": [(6, 0, [self.manager_group.id])],
-        }
-        self.manager1 = self.Users.create(manager1_vals)
-        self.manager2 = self.Users.create(manager2_vals)
+        # Create two "Manager" group users.
+        self.manager1 = self.Users.create(
+            {
+                "name": "Manager 1",
+                "login": "manager1",
+                "email": "manager1@example.com",
+                "groups_id": [(6, 0, [self.group_manager.id])],
+            }
+        )
+        self.manager2 = self.Users.create(
+            {
+                "name": "Manager 2",
+                "login": "manager2",
+                "email": "manager2@example.com",
+                "groups_id": [(6, 0, [self.group_manager.id])],
+            }
+        )
 
     def test_server_copy(self):
         """Test server copy"""
@@ -289,103 +286,7 @@ COMMAND_RESULT = {
             ),
         )
 
-    def test_server_access_rights(self):
-        """Test Server access rights"""
-
-        # Bob is a regular user with no access to Servers
-        server_1_as_bob = self.server_test_1.with_user(self.user_bob)
-
-        # Invalidating cache so values will be fetched again with access check applied
-        server_1_as_bob.invalidate_cache()
-
-        # Access error should be raised because user has no access to the model
-        with self.assertRaises(AccessError):
-            server_name = server_1_as_bob.name
-
-        # Add Bob to group_user and test read as unsubscribed user
-        self.add_to_group(self.user_bob, "cetmix_tower_server.group_user")
-        with self.assertRaises(AccessError):
-            server_name = server_1_as_bob.name
-
-        # Add Bob to group_manager and test read as unsubscribed user
-        self.add_to_group(self.user_bob, "cetmix_tower_server.group_manager")
-        with self.assertRaises(AccessError):
-            server_name = server_1_as_bob.name
-
-        # Add Bob to group_root and test read
-        self.add_to_group(self.user_bob, "cetmix_tower_server.group_root")
-        server_name = server_1_as_bob.name
-        self.assertEqual(
-            server_name, self.server_test_1.name, msg="Sever name does not match!"
-        )
-
-        # Test write as root
-        self.write_and_invalidate(server_1_as_bob, **{"name": "New Server Name"})
-
-    def test_server_subscriber_access_rights(self):
-        """Test Server access rights"""
-        # Create additional server for testing
-        new_server = self.Server.create(
-            {
-                "name": "Test 2",
-                "ip_v4_address": "localhost",
-                "ssh_username": "admin",
-                "ssh_password": "password",
-                "ssh_auth_mode": "p",
-                "os_id": self.os_debian_10.id,
-            }
-        )
-
-        server_1_as_bob = self.server_test_1.with_user(self.user_bob)
-        server_2_as_bob = new_server.with_user(self.user_bob)
-
-        # Invalidating cache so values will be fetched again with access check applied
-        server_1_as_bob.invalidate_cache()
-        server_2_as_bob.invalidate_cache()
-
-        # Add Bob to group_user and test read as subscribed user
-        self.add_to_group(self.user_bob, "cetmix_tower_server.group_user")
-        # Add Bob to followers of that server
-        self.server_test_1.message_subscribe([self.user_bob.partner_id.id])
-
-        # Access error should be raised because user hasn't subscribed to server 2
-        with self.assertRaises(AccessError):
-            server_name = server_2_as_bob.name
-
-        # Check if user Bob can read server 1 name as subscribed user
-        server_name = server_1_as_bob.name
-        self.assertEqual(
-            server_name, self.server_test_1.name, msg="Sever name does not match!"
-        )
-
-        # Add Bob to group_manager and test write
-        self.add_to_group(self.user_bob, "cetmix_tower_server.group_manager")
-        self.write_and_invalidate(server_1_as_bob, **{"name": "New Server Name"})
-        self.assertEqual(
-            self.server_test_1.name, "New Server Name", msg="Sever name does not match!"
-        )
-
-        # Access error should be raised because user Bob hasn't subscribed to server 2
-        with self.assertRaises(AccessError):
-            server_name = server_2_as_bob.name
-
-        # Check if user Bob can create new server as member of group_manager
-        new_server_1 = self.Server.with_user(self.user_bob).create(
-            {
-                "name": "New Server 1",
-                "ip_v4_address": "localhost",
-                "ssh_username": "admin",
-                "ssh_password": "password",
-                "ssh_auth_mode": "p",
-                "os_id": self.os_debian_10.id,
-            }
-        )
-        # Check if server has been created by Bob as member of group_manager
-        self.assertEqual(
-            new_server_1.name, "New Server 1", msg="Sever name does not match!"
-        )
-
-    def test_server_archived_unarchived(self):
+    def test_server_archive_unarchive(self):
         """Test Server archived/unarchived"""
         server = self.server_test_1.copy()
         self.assertTrue(server, msg="Server must be unarchived")
@@ -549,12 +450,15 @@ COMMAND_RESULT = {
             msg="Server status should be delete_error",
         )
 
-    def test_user_record_not_visible_without_subscription(self):
+    # ------------------------------------------------------------
+    # ---- Access
+    # ------------------------------------------------------------
+    def test_user_record_not_visible_without_user_ids(self):
         """
         Test that a user in the 'cetmix_tower_server.group_user' group cannot see
-        a Tower Server record if not subscribed.
+        a Tower Server record if not added to user_ids.
         """
-        # Create a Tower Server record without any subscription.
+        # Create a Tower Server record without any user_ids.
         record = self.Server.create(
             {
                 "name": "User Visibility Test",
@@ -563,6 +467,7 @@ COMMAND_RESULT = {
                 "ssh_password": "password",
                 "ssh_auth_mode": "p",
                 "os_id": self.os_debian_10.id,
+                "user_ids": [(5, 0, 0)],
             }
         )
         # As user1, search for the record. Since user1's partner is not subscribed,
@@ -570,12 +475,12 @@ COMMAND_RESULT = {
         records = self.Server.with_user(self.user1).search([("id", "=", record.id)])
         self.assertFalse(
             records,
-            "User1 should not see the record if not subscribed.",
+            "User1 should not see the record if not added to user_ids.",
         )
 
-    def test_user_record_visible_after_subscription(self):
+    def test_user_record_visible_after_added_to_user_ids(self):
         """
-        Test that a user sees a Tower Server record after being subscribed.
+        Test that a user sees a Tower Server record after being added to user_ids.
         """
         record = self.Server.create(
             {
@@ -585,10 +490,9 @@ COMMAND_RESULT = {
                 "ssh_password": "password",
                 "ssh_auth_mode": "p",
                 "os_id": self.os_debian_10.id,
+                "user_ids": [(4, self.user1.id)],
             }
         )
-        # Subscribe user1's partner to the record.
-        record.message_subscribe(partner_ids=[self.user1.partner_id.id])
         # Now, as user1 the record should be visible.
         records = self.Server.with_user(self.user1).search([("id", "=", record.id)])
         self.assertTrue(
@@ -596,9 +500,9 @@ COMMAND_RESULT = {
             "User1 should see the record after being added to message_partner_ids.",
         )
 
-    def test_only_subscribed_user_can_see(self):
+    def test_only_added_user_can_see(self):
         """
-        Test that only the subscribed user can see the Tower Server record.
+        Test that only the added user can see the Tower Server record.
         """
         record = self.Server.create(
             {
@@ -608,10 +512,10 @@ COMMAND_RESULT = {
                 "ssh_password": "password",
                 "ssh_auth_mode": "p",
                 "os_id": self.os_debian_10.id,
+                "user_ids": [(4, self.user1.id)],
             }
         )
         # Subscribe only user1's partner.
-        record.message_subscribe(partner_ids=[self.user1.partner_id.id])
         records_user1 = self.Server.with_user(self.user1).search(
             [("id", "=", record.id)]
         )
@@ -619,10 +523,11 @@ COMMAND_RESULT = {
             [("id", "=", record.id)]
         )
         self.assertTrue(
-            records_user1, "User1 should see the record after being subscribed."
+            records_user1, "User1 should see the record after being added to user_ids."
         )
         self.assertFalse(
-            records_user2, "User2 should not see the record if they are not subscribed."
+            records_user2,
+            "User2 should not see the record if they are not added to user_ids.",
         )
 
     def test_manager_read_access_as_follower(self):
@@ -642,18 +547,18 @@ COMMAND_RESULT = {
             }
         )
         # Subscribe manager1 to the record so that his partner becomes a follower.
-        record.message_subscribe(partner_ids=[self.manager1.partner_id.id])
+        record.write({"user_ids": [(4, self.manager1.id)]})
 
         # As manager1 (a follower) the record should be visible.
         records = self.Server.with_user(self.manager1).search([("id", "=", record.id)])
-        self.assertTrue(records, "Manager1 (follower) must be able to read the record.")
+        self.assertTrue(records, "Manager1 (user) must be able to read the record.")
 
         # As manager2 (not a follower and not in manager_ids)
         # the record should not be visible.
         records = self.Server.with_user(self.manager2).search([("id", "=", record.id)])
         self.assertFalse(
             records,
-            "Manager2 (not follower and not in manager_ids) must not see the record.",
+            "Manager2 (not user_ids and not in manager_ids) must not see the record.",
         )
 
     def test_manager_read_access_as_manager_ids(self):
@@ -671,17 +576,26 @@ COMMAND_RESULT = {
                 "manager_ids": [(6, 0, [self.manager2.id])],
             }
         )
-        # Without subscribing, manager2 should be able to see the record.
+        # Without adding to user_ids, manager2 should be able to see the record.
         records = self.Server.with_user(self.manager2).search([("id", "=", record.id)])
         self.assertTrue(
             records, "Manager2 (in manager_ids) must be able to read the record."
         )
 
-        # Manager1 is not subscribed nor in manager_ids so should not see the record.
+        # Manager1 is not added to user_ids nor in manager_ids
+        # so should not see the record.
         records = self.Server.with_user(self.manager1).search([("id", "=", record.id)])
         self.assertFalse(
             records,
-            "Manager1 (neither follower nor in manager_ids) must not see the record.",
+            "Manager1 (neither user_ids nor in manager_ids) must not see the record.",
+        )
+
+        # Add manager1 to user_ids
+        record.write({"user_ids": [(4, self.manager1.id)]})
+        records = self.Server.with_user(self.manager1).search([("id", "=", record.id)])
+        self.assertTrue(
+            records,
+            "Manager1 (added to user_ids) must be able to see the record.",
         )
 
     def test_manager_write_access(self):

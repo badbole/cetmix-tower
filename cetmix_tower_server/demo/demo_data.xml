@@ -74,12 +74,8 @@
             name="tag_ids"
             eval="[(6, 0, [ref('cetmix_tower_server.tag_production')])]"
         />
+        <field name="user_ids" eval="[(4, ref('base.user_demo'))]" />
         <field name="note">This server has variables configured</field>
-    </record>
-    <record id="mail_follower_server_demo_2" model="mail.followers">
-        <field name="res_model">cx.tower.server</field>
-        <field name="res_id" ref="server_demo_2" />
-        <field name="partner_id" ref="base.partner_demo" />
     </record>
     <!--  File templates  -->
     <record id="cx_tower_file_template_demo_1" model="cx.tower.file.template">

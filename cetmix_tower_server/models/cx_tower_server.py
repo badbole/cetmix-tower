@@ -261,6 +261,7 @@ class CxTowerServer(models.Model):
 
     _name = "cx.tower.server"
     _inherit = [
+        "cx.tower.access.role.mixin",
         "cx.tower.variable.mixin",
         "cx.tower.reference.mixin",
         "mail.thread",
@@ -268,19 +269,6 @@ class CxTowerServer(models.Model):
     ]
     _description = "Cetmix Tower Server"
     _order = "name asc"
-
-    def _default_manager_ids(self):
-        """
-        Default Managers for new Servers.
-        """
-        # Root does not need to be a manager
-        if self.env.user.has_group("cetmix_tower_server.group_root"):
-            return []
-        # If user is manager, add them to the list
-        if self.env.user.has_group("cetmix_tower_server.group_manager"):
-            return [self.env.user.id]
-        # Otherwise, return an empty list. Eg if created using sudo()
-        return []
 
     # ---- Main
     active = fields.Boolean(default=True)
@@ -401,19 +389,13 @@ class CxTowerServer(models.Model):
         help="This Flightplan will be executed when the server is deleted",
     )
 
-    # ---- Access Related
+    # ---- Access. Add relation for mixin fields
+
+    user_ids = fields.Many2many(
+        relation="cx_tower_server_user_rel",
+    )
     manager_ids = fields.Many2many(
-        comodel_name="res.users",
         relation="cx_tower_server_manager_rel",
-        column1="server_id",
-        column2="user_id",
-        string="Managers",
-        groups="cetmix_tower_server.group_manager",
-        domain=lambda self: [
-            ("groups_id", "in", [self.env.ref("cetmix_tower_server.group_manager").id])
-        ],
-        default=lambda self: self._default_manager_ids(),
-        help="Managers who can modify this server",
     )
 
     def _selection_status(self):

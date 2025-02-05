@@ -15,7 +15,10 @@ class TestTowerCommon(TransactionCase):
         super().setUp(*args, **kwargs)
         # ***
         # Create core elements invoked in the tests
-        # ***
+
+        # Group XML records
+        self.group_user = self.env.ref("cetmix_tower_server.group_user")
+        self.group_manager = self.env.ref("cetmix_tower_server.group_manager")  # ***
 
         # Cetmix Tower helper model
         self.CetmixTower = self.env["cetmix.tower"]

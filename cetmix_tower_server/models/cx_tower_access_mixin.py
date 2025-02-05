@@ -4,10 +4,7 @@ from odoo import fields, models
 
 
 class CxTowerAccessMixin(models.AbstractModel):
-    """Used to implement template rendering functions.
-    Inherit in your model in order code that contains variables.
-
-    """
+    """Used to implement template access levels in models."""
 
     _name = "cx.tower.access.mixin"
     _description = "Cetmix Tower access mixin"
