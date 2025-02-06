@@ -384,6 +384,7 @@
             name="tag_ids"
             eval="[(6, 0, [ref('cetmix_tower_server.tag_staging')])]"
         />
+        <field name="manager_ids" eval="[(6, 0, [ref('base.user_admin')])]" />
     </record>
     <record id="command_check_branch" model="cx.tower.command">
         <field name="name">Execute Python Code: Check Branch</field>
@@ -395,6 +396,7 @@ else:
     COMMAND_RESULT={"exit_code": -1, "message": "Branch is not defined!"}
         </field>
         <field name="access_level">1</field>
+        <field name="user_ids" eval="[(6, 0, [ref('base.user_demo')])]" />
         <field
             name="tag_ids"
             eval="[(6, 0, [ref('cetmix_tower_server.tag_custom')])]"
