@@ -21,6 +21,7 @@ class CxTowerPlan(models.Model):
     _inherit = [
         "cx.tower.reference.mixin",
         "cx.tower.access.mixin",
+        "cx.tower.access.role.mixin",
     ]
     _order = "name asc"
 
@@ -60,6 +61,14 @@ class CxTowerPlan(models.Model):
     access_level_warn_msg = fields.Text(
         compute="_compute_command_access_level",
         compute_sudo=True,
+    )
+
+    # ---- Access. Add relation for mixin fields
+    user_ids = fields.Many2many(
+        relation="cx_tower_plan_user_rel",
+    )
+    manager_ids = fields.Many2many(
+        relation="cx_tower_plan_manager_rel",
     )
 
     def execute(self, servers, **kwargs):

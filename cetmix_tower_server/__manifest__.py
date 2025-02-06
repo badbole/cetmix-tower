@@ -56,6 +56,7 @@
         "views/menuitems.xml",
     ],
     "demo": [
-        "demo/demo_data.xml",
+        "demo/demo_data_generic.xml",
+        "demo/demo_data_plan.xml",
     ],
 }
