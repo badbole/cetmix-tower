@@ -36,10 +36,10 @@
                         <group>
                             <field name="action" />
                             <field
-                                    name="flight_plan_id"
-                                    string="Flight Plan"
-                                    attrs="{'invisible': [('action', '!=', 'plan')]}"
-                                />
+                                name="flight_plan_id"
+                                string="Flight Plan"
+                                attrs="{'invisible': [('action', '!=', 'plan')]}"
+                            />
                             <field
                                 name="file_template_id"
                                 string="File Template"
