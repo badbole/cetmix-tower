@@ -56,8 +56,6 @@
         "views/menuitems.xml",
     ],
     "demo": [
-        "demo/demo_data_generic.xml",
-        "demo/server_template_demo.xml",
-        "demo/flight_plan_demo.xml",
+        "demo/demo_data.xml",
     ],
 }
