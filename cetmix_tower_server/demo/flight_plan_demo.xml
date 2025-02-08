@@ -224,6 +224,7 @@ else:
         <field name="plan_id" ref="plan_demo_5" />
         <field name="command_id" ref="command_download_file" />
     </record>
+
     <!-- Files -->
     <record id="cx_tower_file_server_demo_logs_1" model="cx.tower.file">
         <field name="source">server</field>
@@ -248,52 +249,6 @@ else:
         <field name="log_type">file</field>
         <field name="file_id" ref="cx_tower_file_server_demo_logs_2" />
     </record>
-    <!-- Server Template -->
-    <record id="demo_server_template_1" model="cx.tower.server.template">
-        <field name="name">Demo Server Template #1</field>
-        <field name="color">1</field>
-        <field name="ssh_username">admin</field>
-        <field name="ssh_password">password</field>
-        <field name="ssh_auth_mode">p</field>
-        <field name="os_id" ref="os_debian_10" />
-        <field name="flight_plan_id" ref="plan_demo_1" />
-        <field
-            name="tag_ids"
-            eval="[(6, 0, [ref('cetmix_tower_server.tag_custom')])]"
-        />
-    </record>
-    <record id="server_log_for_server_template_1" model="cx.tower.server.log">
-        <field name="name">Log from file</field>
-        <field name="server_template_id" ref="demo_server_template_1" />
-        <field name="log_type">file</field>
-        <field name="file_template_id" ref="cx_tower_file_template_demo_4" />
-    </record>
-    <!-- Variable values -->
-    <record id="demo_server_template_1_value_path" model="cx.tower.variable.value">
-        <field name="variable_id" ref="variable_demo_path" />
-        <field name="server_template_id" ref="demo_server_template_1" />
-        <field
-            name="value_char"
-        >/opt/{{ tower.server.reference }}/cetmix-tower/{{ branch }}</field>
-    </record>
-    <record id="demo_server_template_1_value_url" model="cx.tower.variable.value">
-        <field name="variable_id" ref="variable_demo_url" />
-        <field name="server_template_id" ref="demo_server_template_1" />
-        <field name="value_char">https://cetmix.com</field>
-    </record>
-    <record id="demo_server_template_1_value_language" model="cx.tower.variable.value">
-        <field name="variable_id" ref="variable_demo_language" />
-        <field name="server_template_id" ref="demo_server_template_1" />
-        <field name="option_id" ref="option_language_it" />
-    </record>
-    <record
-        id="demo_server_template_1_value_odoo_version"
-        model="cx.tower.variable.value"
-    >
-        <field name="variable_id" ref="variable_demo_odoo_version" />
-        <field name="server_template_id" ref="demo_server_template_1" />
-        <field name="option_id" ref="option_odoo_version_17" />
-    </record>
 
     <!-- Server Log of type "command" -->
     <record id="server_log_command_1" model="cx.tower.server.log">
@@ -308,12 +263,7 @@ else:
         <field name="log_type">command</field>
         <field name="command_id" ref="command_create_dir" />
     </record>
-    <record id="server_log_command_template_1" model="cx.tower.server.log">
-        <field name="name">Command Log for Server Template #1</field>
-        <field name="server_template_id" ref="demo_server_template_1" />
-        <field name="log_type">command</field>
-        <field name="command_id" ref="command_create_dir" />
-    </record>
+
     <!-- New Variables for Flight Plan Execution -->
     <record id="variable_flight_plan_status_unique" model="cx.tower.variable">
         <field name="name">Flight Plan Execution Status</field>

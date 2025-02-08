@@ -9,7 +9,12 @@ class CxTowerServerTemplate(models.Model):
     """Server Template. Used to simplify server creation"""
 
     _name = "cx.tower.server.template"
-    _inherit = ["cx.tower.reference.mixin", "mail.thread", "mail.activity.mixin"]
+    _inherit = [
+        "cx.tower.reference.mixin",
+        "mail.thread",
+        "mail.activity.mixin",
+        "cx.tower.access.role.mixin",
+    ]
     _description = "Cetmix Tower Server Template"
 
     active = fields.Boolean(default=True)
@@ -87,6 +92,14 @@ class CxTowerServerTemplate(models.Model):
 
     # -- Other
     note = fields.Text()
+
+    # ---- Access. Add relation for mixin fields
+    user_ids = fields.Many2many(
+        relation="cx_tower_server_template_user_rel",
+    )
+    manager_ids = fields.Many2many(
+        relation="cx_tower_server_template_manager_rel",
+    )
 
     def _compute_server_count(self):
         """
