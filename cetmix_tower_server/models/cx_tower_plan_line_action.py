@@ -15,6 +15,11 @@ class CxTowerPlanLineAction(models.Model):
     line_id = fields.Many2one(
         comodel_name="cx.tower.plan.line", auto_join=True, ondelete="cascade"
     )
+    plan_id = fields.Many2one(
+        comodel_name="cx.tower.plan",
+        related="line_id.plan_id",
+        store=True,
+    )
     condition = fields.Selection(
         selection=[
             ("==", "=="),
