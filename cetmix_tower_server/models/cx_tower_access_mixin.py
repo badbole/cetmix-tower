@@ -34,4 +34,5 @@ class CxTowerAccessMixin(models.AbstractModel):
         string="Access Level",
         default=lambda self: self._default_access_level(),
         required=True,
+        index=True,
     )
