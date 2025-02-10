@@ -63,7 +63,7 @@ class SSH(object):
         self.timeout = timeout
         # NB: allow_agent=False is for avoiding
         # ssh-agent related connection issues~
-        self.allow_agent = allow_agent
+        self.allow_agent = False  # allow_agent
 
         self._ssh = None
         self._sftp = None

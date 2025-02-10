@@ -4,13 +4,13 @@
 {
     "name": "Cetmix Tower Server Notify Backend",
     "summary": "Backend notifications for Cetmix Tower",
-    "version": "14.0.1.0.1",
+    "version": "16.0.1.0.0",
     "category": "Productivity",
     "website": "https://cetmix.com",
-    "author": "Cetmix",
+    "author": "Cetmix, Daj Mi 5",
     "license": "AGPL-3",
     "application": False,
-    "installable": True,
+    "installable": False,
     "depends": [
         "cetmix_tower_server",
         "web_notify",

@@ -6,10 +6,10 @@
     "version": "14.0.1.0.1",
     "category": "Productivity",
     "website": "https://cetmix.com",
-    "author": "Cetmix",
+    "author": "Cetmix, Daj Mi 5",
     "license": "AGPL-3",
     "application": False,
-    "installable": True,
+    "installable": False,
     "depends": ["cetmix_tower_server"],
     "external_dependencies": {"python": ["pyyaml"]},
     "data": [

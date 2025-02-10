@@ -3,13 +3,13 @@
 {
     "name": "Cetmix Tower Server Management",
     "summary": "Flexible Server Management directly from Odoo",
-    "version": "14.0.0.4.9",
+    "version": "16.0.0.0.0",
     "category": "Productivity",
     "website": "https://cetmix.com",
-    "author": "Cetmix",
+    "author": "Cetmix, Daj Mi 5",
     "license": "AGPL-3",
     "application": True,
-    "installable": True,
+    "installable": False,
     "external_dependencies": {
         "python": ["paramiko"],
         "bin": [],
