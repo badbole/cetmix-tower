@@ -3,12 +3,15 @@
 {
     "name": "Cetmix Tower Server Queue",
     "summary": "OCA Queue implementation for Cetmix Tower Server",
-    "version": "14.0.1.0.3",
+    "version": "16.0.1.0.0",
     "category": "Productivity",
     "website": "https://cetmix.com",
     "author": "Cetmix, Daj Mi 5",
     "license": "AGPL-3",
     "application": False,
-    "installable": False,
-    "depends": ["cetmix_tower_server", "queue_job"],
+    "installable": True,
+    "depends": [
+        "cetmix_tower_server",
+        "queue_job"
+    ],
 }

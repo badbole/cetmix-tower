@@ -38,6 +38,7 @@
                     />
                     <field name="plan_line_ids">
                         <tree decoration-bf="action=='plan'">
+                            <field name="action" invisible="1"/> <!-- avoid group problem -->
                             <field name="name" />
                             <field
                                 name="action"

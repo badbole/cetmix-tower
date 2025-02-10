@@ -74,6 +74,7 @@
                         <page name="plan_lines" string="Code">
                             <field name="line_ids">
                                 <tree decoration-bf="action=='plan'">
+                                    <field name="action" invisible="1"/> <!-- avoid group rights error-->
                                     <field name="sequence" widget="handle" />
                                     <field name="name" />
                                     <field name="reference" optional="hide" />

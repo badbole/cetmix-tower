@@ -9,7 +9,7 @@
     "author": "Cetmix, Daj Mi 5",
     "license": "AGPL-3",
     "application": True,
-    "installable": False,
+    "installable": True,
     "external_dependencies": {
         "python": ["paramiko"],
         "bin": [],

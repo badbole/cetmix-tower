@@ -9,7 +9,7 @@
     "author": "Cetmix, Daj Mi 5",
     "license": "AGPL-3",
     "application": False,
-    "installable": False,
+    "installable": True,
     "depends": ["cetmix_tower_server"],
     "external_dependencies": {"python": ["pyyaml"]},
     "data": [
