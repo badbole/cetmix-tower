@@ -306,6 +306,7 @@
                                         options="{'no_create': True, 'no_create_edit': True}"
                                         attrs="{'readonly': [('variable_type', '=', 's')]}"
                                     />
+                                    <field name="access_level" optional="show" />
                                 </tree>
                                 <form>
                                     <group>
@@ -320,6 +321,7 @@
                                             widget="CopyClipboardChar"
                                             options="{'string': 'Copy value'}"
                                         />
+                                        <field name="access_level" />
                                     </group>
                                     <field
                                         name="note"

@@ -56,3 +56,84 @@ class TestTowerVariableOption(TestTowerCommon):
         # Set value_char to a non-existing option
         with self.assertRaises(ValidationError):
             variable_value.value_char = "29.0"
+
+    def test_access_level_consistency(self):
+        """Test that variable option access level cannot be lower
+        than variable access level."""
+
+        # Create a variable with access level "2"
+        variable_restricted = self.Variable.create(
+            {
+                "name": "restricted_variable",
+                "variable_type": "o",
+                "access_level": "2",
+            }
+        )
+
+        # Should succeed: option with same access level as variable
+        try:
+            self.VariableOption.create(
+                {
+                    "name": "Option 1",
+                    "value_char": "value1",
+                    "variable_id": variable_restricted.id,
+                    "access_level": "2",
+                }
+            )
+        except ValidationError:
+            self.fail("Should allow creating option with same access level as variable")
+
+        # Should succeed: option with higher access level than variable
+        try:
+            self.VariableOption.create(
+                {
+                    "name": "Option 2",
+                    "value_char": "value2",
+                    "variable_id": variable_restricted.id,
+                    "access_level": "3",
+                }
+            )
+        except ValidationError:
+            self.fail(
+                "Should allow creating option with higher access level than variable"
+            )
+
+        # Should fail: option with lower access level than variable
+        with self.assertRaises(
+            ValidationError,
+            msg="Should not allow creating option "
+            "with lower access level than variable",
+        ):
+            self.VariableOption.create(
+                {
+                    "name": "Option 3",
+                    "value_char": "value3",
+                    "variable_id": variable_restricted.id,
+                    "access_level": "1",
+                }
+            )
+
+        # Test updating existing option's access level
+        option = self.VariableOption.create(
+            {
+                "name": "Option 4",
+                "value_char": "value4",
+                "variable_id": variable_restricted.id,
+                "access_level": "2",
+            }
+        )
+
+        # Should fail: updating to lower access level than variable
+        with self.assertRaises(
+            ValidationError,
+            msg="Should not allow updating option to lower access level than variable",
+        ):
+            option.write({"access_level": "1"})
+
+        # Should succeed: updating to higher access level than variable
+        try:
+            option.write({"access_level": "3"})
+        except ValidationError:
+            self.fail(
+                "Should allow updating option to higher access level than variable"
+            )

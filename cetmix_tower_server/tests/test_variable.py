@@ -744,3 +744,103 @@ class TestTowerVariable(TestTowerCommon):
                     "server_id": server.id,
                 }
             )
+
+    def test_value_access_level_consistency(self):
+        """Test that variable value access level cannot be lower
+        than variable access level."""
+
+        # Create test servers
+        server_2 = self.Server.create(
+            {
+                "name": "Test Server 2",
+                "ip_v4_address": "localhost",
+                "ssh_username": "admin",
+                "ssh_password": "password",
+                "os_id": self.os_debian_10.id,
+            }
+        )
+
+        server_3 = self.Server.create(
+            {
+                "name": "Test Server 3",
+                "ip_v4_address": "localhost",
+                "ssh_username": "admin",
+                "ssh_password": "password",
+                "os_id": self.os_debian_10.id,
+            }
+        )
+
+        # Create a variable with access level "2"
+        variable_restricted = self.Variable.create(
+            {
+                "name": "restricted_variable",
+                "access_level": "2",
+            }
+        )
+
+        # Should succeed: value with same access level as variable
+        try:
+            self.VariableValue.create(
+                {
+                    "variable_id": variable_restricted.id,
+                    "value_char": "test_value1",
+                    "access_level": "2",
+                    "is_global": True,
+                }
+            )
+        except ValidationError:
+            self.fail("Should allow creating value with same access level as variable")
+
+        # Should succeed: value with higher access level than variable
+        try:
+            self.VariableValue.create(
+                {
+                    "variable_id": variable_restricted.id,
+                    "value_char": "test_value2",
+                    "access_level": "3",
+                    "server_id": server_2.id,
+                }
+            )
+        except ValidationError:
+            self.fail(
+                "Should allow creating value with higher access level than variable"
+            )
+
+        # Should fail: value with lower access level than variable
+        with self.assertRaises(
+            ValidationError,
+            msg="Should not allow creating value with lower access level than variable",
+        ):
+            self.VariableValue.create(
+                {
+                    "variable_id": variable_restricted.id,
+                    "value_char": "test_value3",
+                    "access_level": "1",
+                    "server_id": server_3.id,
+                }
+            )
+
+        # Test updating existing value's access level
+        value = self.VariableValue.create(
+            {
+                "variable_id": self.variable_dir.id,  # Using a different variable
+                "value_char": "test_value4",
+                "access_level": "2",
+                "server_id": server_3.id,
+            }
+        )
+
+        # Should fail: updating to lower access level than variable
+        with self.assertRaises(
+            ValidationError,
+            msg="Should not allow updating value to lower access level than variable",
+        ):
+            value.write({"access_level": "1"})
+
+        # Should succeed: updating to higher access level than variable
+        try:
+            value.write({"access_level": "3"})
+        except ValidationError:
+            self.fail(
+                "Should allow updating value to higher access level than variable"
+            )
