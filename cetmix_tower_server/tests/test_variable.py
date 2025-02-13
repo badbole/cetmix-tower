@@ -333,132 +333,6 @@ class TestTowerVariable(TestTowerCommon):
             "models/cx_tower_server.py",
         )
 
-    def test_variable_value_access(self):
-        """Test access rules for variable values"""
-        server = self.server_test_1
-
-        # Create variables assigned to server
-        # Private
-        variable_private = self.Variable.create({"name": "Private Variable"})
-        variable_private_value = self.VariableValue.create(
-            {
-                "variable_id": variable_private.id,
-                "server_id": server.id,
-                "value_char": "Private Value",
-            }
-        )
-
-        # Global
-        variable_global = self.Variable.create({"name": "Variable Global"})
-        variable_global_value = self.VariableValue.create(
-            {
-                "variable_id": variable_global.id,
-                "is_global": True,
-                "value_char": "Global Value",
-            }
-        )
-
-        user_bob = self.user_bob
-
-        # Remove user_bob from all tower security groups for sure
-        self.remove_from_group(
-            user_bob,
-            [
-                "cetmix_tower_server.group_user",
-                "cetmix_tower_server.group_manager",
-                "cetmix_tower_server.group_root",
-            ],
-        )
-
-        # Make user_bob member of a group_user
-        self.add_to_group(user_bob, "cetmix_tower_server.group_user")
-
-        # Check if group_user member can access global values
-        variable_global_value_as_bob = variable_global_value.with_user(user_bob)
-        variable_global_value = variable_global_value_as_bob.value_char
-        self.assertEqual(
-            variable_global_value, "Global Value", msg="Must return 'Global Value'"
-        )
-        # Check what group_user member can't access values of variables
-        #  of servers that he doesn't follow
-        variable_private_value_as_bob = variable_private_value.with_user(user_bob)
-        with self.assertRaises(AccessError):
-            variable_private_value = variable_private_value_as_bob.value_char
-
-        # Make user_bob follower of server created
-        server.message_subscribe([user_bob.partner_id.id])
-
-        # Check if he has access to values of variables of servers that he follows
-        variable_private_value = variable_private_value_as_bob.value_char
-
-        self.assertEqual(variable_private_value, "Private Value")
-
-        # Check that user_bob can't create new variable values
-        with self.assertRaises(AccessError):
-            self.VariableValue.with_user(user_bob).create(
-                {
-                    "variable_id": variable_private.id,
-                    "server_id": server.id,
-                    "value_char": "Private Value 1",
-                }
-            )
-
-        # Make user_bob member of a group_manager
-        self.add_to_group(user_bob, "cetmix_tower_server.group_manager")
-
-        # Check that user_bob can create new variables either global and local
-        variable_new_global_as_bob = self.Variable.with_user(user_bob).create(
-            {"name": "New Global Variable"}
-        )
-        variable_new_global_value_as_bob = self.VariableValue.with_user(
-            user_bob
-        ).create(
-            {
-                "variable_id": variable_new_global_as_bob.id,
-                "is_global": True,
-                "value_char": "Global Value 1",
-            }
-        )
-        self.assertEqual(
-            variable_new_global_value_as_bob.value_char,
-            "Global Value 1",
-            "Must return Global Value 1",
-        )
-
-        variable_new_private_as_bob = self.Variable.with_user(user_bob).create(
-            {"name": "New Private Variable"}
-        )
-        variable_vale_new_private_as_bob = self.VariableValue.with_user(
-            user_bob
-        ).create(
-            {
-                "variable_id": variable_new_private_as_bob.id,
-                "server_id": server.id,
-                "value_char": "New Private Value",
-            }
-        )
-        self.assertEqual(
-            variable_vale_new_private_as_bob.value_char,
-            "New Private Value",
-            "Must return New Private Value",
-        )
-
-        # Remove user from followers of the server, check if he lost access to private
-        # variables
-
-        server.message_unsubscribe([user_bob.partner_id.id])
-        with self.assertRaises(AccessError):
-            variable_private_value = variable_private_value_as_bob.value_char
-
-        # Make user_bob member of group_root
-        self.add_to_group(user_bob, "cetmix_tower_server.group_root")
-
-        # Check if he can see all variables
-        self.assertEqual(
-            variable_vale_new_private_as_bob.value_char, "New Private Value"
-        )
-        self.assertEqual(variable_new_global_value_as_bob.value_char, "Global Value 1")
-
     def test_system_variable_server_type_values(self):
         """Test system variables of `server` type"""
 
@@ -844,3 +718,139 @@ class TestTowerVariable(TestTowerCommon):
             self.fail(
                 "Should allow updating value to higher access level than variable"
             )
+
+    def test_variable_access_rights(self):
+        """Test access rights for variables based on access levels and user roles."""
+
+        # Create variables with different access levels
+        variable_level_1 = self.Variable.create(
+            {
+                "name": "Level 1 Variable",
+                "access_level": "1",
+            }
+        )
+
+        variable_level_2 = self.Variable.create(
+            {
+                "name": "Level 2 Variable",
+                "access_level": "2",
+            }
+        )
+
+        variable_level_3 = self.Variable.create(
+            {
+                "name": "Level 3 Variable",
+                "access_level": "3",
+            }
+        )
+        manager2 = self.Users.create(
+            {
+                "name": "Manager 2",
+                "login": "manager2@example.com",
+                "groups_id": [(4, self.group_manager.id)],
+            }
+        )
+
+        # Test User Access
+        # ---------------
+        # Should see level 1 variables
+        records = self.Variable.with_user(self.user).search(
+            [
+                (
+                    "id",
+                    "in",
+                    [variable_level_1.id, variable_level_2.id, variable_level_3.id],
+                )
+            ]
+        )
+        self.assertEqual(len(records), 1, "User should only see level 1 variables")
+        self.assertEqual(
+            records.id, variable_level_1.id, "User should only see level 1 variables"
+        )
+
+        # Test Manager Access
+        # -----------------
+        # Should see level 1 and 2 variables
+        records = self.Variable.with_user(self.manager).search(
+            [
+                (
+                    "id",
+                    "in",
+                    [variable_level_1.id, variable_level_2.id, variable_level_3.id],
+                )
+            ]
+        )
+        self.assertEqual(len(records), 2, "Manager should see level 1 and 2 variables")
+        self.assertIn(
+            variable_level_1.id, records.ids, "Manager should see level 1 variables"
+        )
+        self.assertIn(
+            variable_level_2.id, records.ids, "Manager should see level 2 variables"
+        )
+
+        # Test Manager Write Access
+        # -----------------------
+        # Create a variable as manager
+        manager_variable = self.Variable.with_user(self.manager).create(
+            {
+                "name": "Manager Created Variable",
+                "access_level": "2",
+            }
+        )
+
+        # Manager should be able to modify their own variable
+        try:
+            manager_variable.with_user(self.manager).write({"name": "Updated Name"})
+        except AccessError:
+            self.fail("Manager should be able to modify their own variables")
+
+        # Manager should not be able to modify another manager's variable
+        manager2_variable = self.Variable.with_user(manager2).create(
+            {
+                "name": "Other Manager Variable",
+                "access_level": "2",
+            }
+        )
+
+        with self.assertRaises(AccessError):
+            manager2_variable.with_user(self.manager).write({"name": "Try Update"})
+
+        # Manager should not be able to create level 3 variable
+        with self.assertRaises(AccessError):
+            self.Variable.with_user(self.manager).create(
+                {
+                    "name": "Try Level 3",
+                    "access_level": "3",
+                }
+            )
+
+        # Test Root Access
+        # --------------
+        # Root should see all variables
+        records = self.Variable.with_user(self.root).search(
+            [
+                (
+                    "id",
+                    "in",
+                    [variable_level_1.id, variable_level_2.id, variable_level_3.id],
+                )
+            ]
+        )
+        self.assertEqual(len(records), 3, "Root should see all variables")
+
+        # Root should be able to create any level variable
+        try:
+            self.Variable.with_user(self.root).create(
+                {
+                    "name": "Root Level 3",
+                    "access_level": "3",
+                }
+            )
+        except AccessError:
+            self.fail("Root should be able to create any level variable")
+
+        # Root should be able to modify any variable
+        try:
+            variable_level_3.with_user(self.root).write({"name": "Updated by Root"})
+        except AccessError:
+            self.fail("Root should be able to modify any variable")

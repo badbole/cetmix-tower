@@ -1,4 +1,4 @@
-from odoo.exceptions import ValidationError
+from odoo.exceptions import AccessError, ValidationError
 
 from .common import TestTowerCommon
 
@@ -31,6 +31,47 @@ class TestTowerVariableOption(TestTowerCommon):
                 "name": "18.0",
                 "value_char": "18.0",
                 "variable_id": self.variable_odoo_versions.id,
+            }
+        )
+
+        # Create additional test users
+        self.manager2 = self.Users.create(
+            {
+                "name": "Manager 2",
+                "login": "manager2@example.com",
+                "groups_id": [(4, self.group_manager.id)],
+            }
+        )
+
+        # Create variables with different access levels
+        self.variable_level_1 = self.Variable.create(
+            {
+                "name": "Level 1 Variable",
+                "access_level": "1",
+            }
+        )
+
+        self.variable_level_2 = self.Variable.create(
+            {
+                "name": "Level 2 Variable",
+                "access_level": "2",
+            }
+        )
+
+        # Create options with different access levels (inherited from variables)
+        self.option_level_1 = self.VariableOption.create(
+            {
+                "name": "Option Level 1",
+                "value_char": "value1",
+                "variable_id": self.variable_level_1.id,
+            }
+        )
+
+        self.option_level_2 = self.VariableOption.create(
+            {
+                "name": "Option Level 2",
+                "value_char": "value2",
+                "variable_id": self.variable_level_2.id,
             }
         )
 
@@ -137,3 +178,89 @@ class TestTowerVariableOption(TestTowerCommon):
             self.fail(
                 "Should allow updating option to higher access level than variable"
             )
+
+    def test_variable_option_access_rights(self):
+        """
+        Test access rights for variable options
+        based on access levels and user roles.
+        """
+
+        # Test User Access
+        # ---------------
+        # Should see level 1 options only
+        records = self.VariableOption.with_user(self.user).search(
+            [("id", "in", [self.option_level_1.id, self.option_level_2.id])]
+        )
+        self.assertEqual(len(records), 1, "User should only see level 1 options")
+        self.assertEqual(
+            records.id, self.option_level_1.id, "User should only see level 1 options"
+        )
+
+        # Test Manager Access
+        # -----------------
+        # Should see level 1 and 2 options
+        records = self.VariableOption.with_user(self.manager).search(
+            [("id", "in", [self.option_level_1.id, self.option_level_2.id])]
+        )
+        self.assertEqual(len(records), 2, "Manager should see level 1 and 2 options")
+        self.assertIn(
+            self.option_level_1.id, records.ids, "Manager should see level 1 options"
+        )
+        self.assertIn(
+            self.option_level_2.id, records.ids, "Manager should see level 2 options"
+        )
+
+        # Test Manager Write Access
+        # -----------------------
+        # Create an option as manager
+        manager_option = self.VariableOption.with_user(self.manager).create(
+            {
+                "name": "Manager Created Option",
+                "value_char": "manager_value",
+                "variable_id": self.variable_level_2.id,
+            }
+        )
+
+        # Manager should be able to modify their own option
+        try:
+            manager_option.with_user(self.manager).write({"name": "Updated Name"})
+        except AccessError:
+            self.fail("Manager should be able to modify their own options")
+
+        # Manager should not be able to modify another manager's option
+        manager2_option = self.VariableOption.with_user(self.manager2).create(
+            {
+                "name": "Other Manager Option",
+                "value_char": "other_value",
+                "variable_id": self.variable_level_2.id,
+            }
+        )
+
+        with self.assertRaises(AccessError):
+            manager2_option.with_user(self.manager).write({"name": "Try Update"})
+
+        # Test Root Access
+        # --------------
+        # Root should see all options
+        records = self.VariableOption.with_user(self.root).search(
+            [("id", "in", [self.option_level_1.id, self.option_level_2.id])]
+        )
+        self.assertEqual(len(records), 2, "Root should see all options")
+
+        # Root should be able to create any option
+        try:
+            self.VariableOption.with_user(self.root).create(
+                {
+                    "name": "Root Created Option",
+                    "value_char": "root_value",
+                    "variable_id": self.variable_level_2.id,
+                }
+            )
+        except AccessError:
+            self.fail("Root should be able to create any option")
+
+        # Root should be able to modify any option
+        try:
+            self.option_level_2.with_user(self.root).write({"name": "Updated by Root"})
+        except AccessError:
+            self.fail("Root should be able to modify any option")

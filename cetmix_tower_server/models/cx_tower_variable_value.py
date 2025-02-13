@@ -21,6 +21,8 @@ class TowerVariableValue(models.Model):
         compute="_compute_access_level",
         readonly=False,
         store=True,
+        default=None,
+        required=False,  # Workaround for the default value not being set
     )
     variable_id = fields.Many2one(
         string="Variable",
@@ -118,31 +120,41 @@ class TowerVariableValue(models.Model):
     @api.constrains("access_level", "variable_id")
     def _check_access_level_consistency(self):
         """
+        Ensure that variable value access level is defined.
         Ensure that the access level of the variable value is not lower than
         the access level of the associated variable.
         """
         for rec in self:
-            if rec.variable_id and rec.access_level < rec.variable_id.access_level:
-                raise ValidationError(
-                    _(
-                        "The access level for Variable Value '%(value)s' cannot be"
-                        "lower than the access level of its Variable '%(variable)s'.\n"
-                        "Variable Access Level: %(var_level)s\n"
-                        "Variable Value Access Level: %(val_level)s",
-                        value=rec.value_char or _("Undefined"),
-                        variable=rec.variable_id.name,
-                        var_level=dict(
-                            rec.fields_get(["access_level"])["access_level"][
-                                "selection"
-                            ]
-                        )[rec.variable_id.access_level],
-                        val_level=dict(
-                            rec.fields_get(["access_level"])["access_level"][
-                                "selection"
-                            ]
-                        )[rec.access_level],
+            if rec.variable_id:
+                if not rec.access_level:
+                    raise ValidationError(
+                        _(
+                            "Access level is not defined for '%(variable)s'",
+                            variable=rec.variable_id.name,
+                        )
                     )
-                )
+                if rec.access_level < rec.variable_id.access_level:
+                    raise ValidationError(
+                        _(
+                            "The access level for Variable Value '%(value)s' "
+                            "cannot be lower than the access level of its "
+                            "Variable '%(variable)s'.\n"
+                            "Variable Access Level: %(var_level)s\n"
+                            "Variable Value Access Level: %(val_level)s",
+                            value=rec.value_char or _("Undefined"),
+                            variable=rec.variable_id.name,
+                            var_level=dict(
+                                rec.fields_get(["access_level"])["access_level"][
+                                    "selection"
+                                ]
+                            )[rec.variable_id.access_level],
+                            val_level=dict(
+                                rec.fields_get(["access_level"])["access_level"][
+                                    "selection"
+                                ]
+                            )[rec.access_level],
+                        )
+                    )
 
     @api.depends("variable_id", "variable_id.access_level")
     def _compute_access_level(self):

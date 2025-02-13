@@ -34,6 +34,8 @@ class TowerVariableOption(models.Model):
         compute="_compute_access_level",
         readonly=False,
         store=True,
+        default=None,
+        required=False,  # Workaround for the default value not being set
     )
     name = fields.Char(string="Name", required=True)
     value_char = fields.Char(string="Value", required=True)
@@ -61,27 +63,36 @@ class TowerVariableOption(models.Model):
         the access level of the associated variable.
         """
         for rec in self:
-            if rec.variable_id and rec.access_level < rec.variable_id.access_level:
-                raise ValidationError(
-                    _(
-                        "The access level for Variable Option '%(value)s' cannot be"
-                        "lower than the access level of its Variable '%(variable)s'.\n"
-                        "Variable Access Level: %(var_level)s\n"
-                        "Variable Option Access Level: %(val_level)s",
-                        value=rec.name,
-                        variable=rec.variable_id.name,
-                        var_level=dict(
-                            rec.fields_get(["access_level"])["access_level"][
-                                "selection"
-                            ]
-                        )[rec.variable_id.access_level],
-                        val_level=dict(
-                            rec.fields_get(["access_level"])["access_level"][
-                                "selection"
-                            ]
-                        )[rec.access_level],
+            if rec.variable_id:
+                if not rec.access_level:
+                    raise ValidationError(
+                        _(
+                            "Access level is not defined for '%(option)s'",
+                            option=rec.name,
+                        )
                     )
-                )
+                if rec.access_level < rec.variable_id.access_level:
+                    raise ValidationError(
+                        _(
+                            "The access level for Variable Option '%(value)s' "
+                            "cannot be lower than the access level of its "
+                            "Variable '%(variable)s'.\n"
+                            "Variable Access Level: %(var_level)s\n"
+                            "Variable Option Access Level: %(val_level)s",
+                            value=rec.name,
+                            variable=rec.variable_id.name,
+                            var_level=dict(
+                                rec.fields_get(["access_level"])["access_level"][
+                                    "selection"
+                                ]
+                            )[rec.variable_id.access_level],
+                            val_level=dict(
+                                rec.fields_get(["access_level"])["access_level"][
+                                    "selection"
+                                ]
+                            )[rec.access_level],
+                        )
+                    )
 
     @api.depends("variable_id", "variable_id.access_level")
     def _compute_access_level(self):
