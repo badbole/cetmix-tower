@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
   <!-- User: read allowed if access_level == 1 and either command.user_ids or a related server grants access via user_ids -->
-  <record id="ir_rule_cx_tower_command_user_read" model="ir.rule">
+  <record id="rule_cx_tower_command_group_user_read" model="ir.rule">
       <field name="name">Command: User read</field>
       <field name="model_id" ref="model_cx_tower_command" />
       <field name="groups" eval="[(4, ref('cetmix_tower_server.group_user'))]" />
@@ -20,7 +20,7 @@
   </record>
 
   <!-- Manager: read allowed if access_level <= 2 and   command or server grants access -->
-  <record id="ir_rule_cx_tower_command_manager_read" model="ir.rule">
+  <record id="rule_cx_tower_command_group_manager_read" model="ir.rule">
       <field name="name">Command: Manager read</field>
       <field name="model_id" ref="model_cx_tower_command" />
       <field name="groups" eval="[(4, ref('cetmix_tower_server.group_manager'))]" />
@@ -43,7 +43,7 @@
   </record>
 
   <!-- Manager: write & create allowed if access_level <= 2 and in command.manager_ids -->
-  <record id="ir_rule_cx_tower_command_manager_write_create" model="ir.rule">
+  <record id="rule_cx_tower_command_group_manager_write" model="ir.rule">
       <field name="name">Command: Manager write &amp; create</field>
       <field name="model_id" ref="model_cx_tower_command" />
       <field name="groups" eval="[(4, ref('cetmix_tower_server.group_manager'))]" />
@@ -57,7 +57,7 @@
   </record>
 
   <!-- Manager: unlink allowed if access_level <= 2, creator, and in manager_ids -->
-  <record id="ir_rule_cx_tower_command_manager_unlink" model="ir.rule">
+  <record id="rule_cx_tower_command_group_manager_unlink" model="ir.rule">
       <field name="name">Command: Manager unlink</field>
       <field name="model_id" ref="model_cx_tower_command" />
       <field name="groups" eval="[(4, ref('cetmix_tower_server.group_manager'))]" />
@@ -75,7 +75,7 @@
   </record>
 
   <!-- Root: unrestricted access -->
-  <record id="ir_rule_cx_tower_command_root_unrestricted" model="ir.rule">
+  <record id="rule_cx_tower_command_group_root_full" model="ir.rule">
       <field name="name">Command: Root unrestricted access</field>
       <field name="model_id" ref="model_cx_tower_command" />
       <field name="groups" eval="[(4, ref('cetmix_tower_server.group_root'))]" />

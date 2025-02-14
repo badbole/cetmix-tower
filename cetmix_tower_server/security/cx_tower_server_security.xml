@@ -2,7 +2,7 @@
 <odoo>
 
     <!-- User Access -->
-    <record id="cx_tower_server_rule_group_user_visibility" model="ir.rule">
+    <record id="rule_cx_tower_server_group_user_read" model="ir.rule">
         <field name="name">Tower Server: user visibility rule</field>
         <field name="model_id" ref="model_cx_tower_server" />
         <field name="groups" eval="[(4, ref('group_user'))]" />
@@ -16,10 +16,10 @@
 
     <!-- Manager Access -->
     <!-- Rule 1: Read access if the current user is a follower or is in manager_ids -->
-    <record id="ir_rule_cx_tower_server_manager_read" model="ir.rule">
+    <record id="rule_cx_tower_server_group_manager_read" model="ir.rule">
         <field
             name="name"
-        >cx.tower.server: Manager Read (if follower or in manager_ids)</field>
+        >Tower Server: Manager Read (if follower or in manager_ids)</field>
         <field name="model_id" ref="model_cx_tower_server" />
         <field name="groups" eval="[(4, ref('cetmix_tower_server.group_manager'))]" />
         <!-- allow read if the user is in Users or Managers -->
@@ -34,10 +34,10 @@
     </record>
 
     <!-- Rule 2: Write and Create access if the current user is in manager_ids -->
-    <record id="ir_rule_cx_tower_server_manager_write_create" model="ir.rule">
+    <record id="rule_cx_tower_server_group_manager_write" model="ir.rule">
         <field
             name="name"
-        >cx.tower.server: Manager Write &amp; Create (if in manager_ids)</field>
+        >Tower Server: Manager Write &amp; Create (if in manager_ids)</field>
         <field name="model_id" ref="model_cx_tower_server" />
         <field name="groups" eval="[(4, ref('cetmix_tower_server.group_manager'))]" />
         <!-- allow write/create only if the user is in the manager_ids many2many field -->
@@ -49,10 +49,10 @@
     </record>
 
     <!-- Rule 3: Delete access if the current user is in manager_ids and is the creator -->
-    <record id="ir_rule_cx_tower_server_manager_unlink" model="ir.rule">
+    <record id="rule_cx_tower_server_group_manager_unlink" model="ir.rule">
         <field
             name="name"
-        >cx.tower.server: Manager Delete (if in manager_ids and creator)</field>
+        >Tower Server: Manager Delete (if in manager_ids and creator)</field>
         <field name="model_id" ref="model_cx_tower_server" />
         <field name="groups" eval="[(4, ref('cetmix_tower_server.group_manager'))]" />
         <!-- allow deletion only if the user is in manager_ids and he is the record creator -->
@@ -67,7 +67,7 @@
 
 
     <!-- Root Access -->
-    <record id="cx_tower_server_rule_group_root_visibility" model="ir.rule">
+    <record id="rule_cx_tower_server_group_root_full" model="ir.rule">
         <field name="name">Tower Server: root visibility rule</field>
         <field name="model_id" ref="model_cx_tower_server" />
         <field name="domain_force">[(1, '=', 1)]</field>

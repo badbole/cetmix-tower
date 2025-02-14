@@ -2,7 +2,7 @@
 <odoo>
 
     <!-- User access rule -->
-    <record id="cx_tower_server_log_rule_group_user_access" model="ir.rule">
+    <record id="rule_cx_tower_server_log_group_user_read" model="ir.rule">
         <field name="name">Tower server log: user access rule</field>
         <field name="model_id" ref="model_cx_tower_server_log" />
         <field name="groups" eval="[(4, ref('cetmix_tower_server.group_user'))]" />
@@ -13,7 +13,7 @@
     </record>
 
     <!-- Manager access rules -->
-    <record id="cx_tower_server_log_rule_group_manager_read" model="ir.rule">
+    <record id="rule_cx_tower_server_log_group_manager_read" model="ir.rule">
         <field name="name">Tower server log: manager read access rule</field>
         <field name="model_id" ref="model_cx_tower_server_log" />
         <field name="groups" eval="[(4, ref('cetmix_tower_server.group_manager'))]" />
@@ -29,7 +29,7 @@
         <field name="perm_unlink" eval="0" />
     </record>
 
-    <record id="cx_tower_server_log_rule_group_manager_write" model="ir.rule">
+    <record id="rule_cx_tower_server_log_group_manager_write" model="ir.rule">
         <field name="name">Tower server log: manager write access rule</field>
         <field name="model_id" ref="model_cx_tower_server_log" />
         <field name="groups" eval="[(4, ref('cetmix_tower_server.group_manager'))]" />
@@ -43,7 +43,7 @@
         <field name="perm_unlink" eval="0" />
     </record>
 
-    <record id="cx_tower_server_log_rule_group_manager_unlink" model="ir.rule">
+    <record id="rule_cx_tower_server_log_group_manager_unlink" model="ir.rule">
         <field name="name">Tower server log: manager unlink access rule</field>
         <field name="model_id" ref="model_cx_tower_server_log" />
         <field name="groups" eval="[(4, ref('cetmix_tower_server.group_manager'))]" />
@@ -59,7 +59,7 @@
     </record>
 
     <!-- Root access rule -->
-    <record id="cx_tower_server_log_rule_group_root_access" model="ir.rule">
+    <record id="rule_cx_tower_server_log_group_root_full" model="ir.rule">
         <field name="name">Tower server log: root access rule</field>
         <field name="model_id" ref="model_cx_tower_server_log" />
         <field name="domain_force">[(1, "=", 1)]</field>

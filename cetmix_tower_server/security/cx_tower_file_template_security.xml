@@ -3,7 +3,7 @@
 
 
   <!-- Manager: Read access (if the current user is in user_ids or manager_ids) -->
-  <record id="ir_rule_cx_tower_file_template_manager_read" model="ir.rule">
+  <record id="rule_cx_tower_file_template_group_manager_read" model="ir.rule">
       <field name="name">File: Manager read (user_ids or manager_ids)</field>
       <field name="model_id" ref="model_cx_tower_file_template" />
       <field name="groups" eval="[(4, ref('cetmix_tower_server.group_manager'))]" />
@@ -17,7 +17,7 @@
   </record>
 
   <!-- Manager: Write and Create access (if the current user is in manager_ids) -->
-  <record id="ir_rule_cx_tower_file_template_manager_write_create" model="ir.rule">
+  <record id="rule_cx_tower_file_template_group_manager_write" model="ir.rule">
       <field name="name">File: Manager write &amp; create (manager_ids)</field>
       <field name="model_id" ref="model_cx_tower_file_template" />
       <field name="groups" eval="[(4, ref('cetmix_tower_server.group_manager'))]" />
@@ -29,7 +29,7 @@
   </record>
 
   <!-- Manager: Unlink access (if the current user is in manager_ids and is the record creator) -->
-  <record id="ir_rule_cx_tower_file_template_manager_unlink" model="ir.rule">
+  <record id="rule_cx_tower_file_template_group_manager_unlink" model="ir.rule">
       <field name="name">File: Manager unlink (manager_ids &amp; creator)</field>
       <field name="model_id" ref="model_cx_tower_file_template" />
       <field name="groups" eval="[(4, ref('cetmix_tower_server.group_manager'))]" />
@@ -43,7 +43,7 @@
   </record>
 
   <!-- Root: unlimited access -->
-  <record id="ir_rule_cx_tower_file_template_root_unrestricted" model="ir.rule">
+  <record id="rule_cx_tower_file_template_group_root_full" model="ir.rule">
       <field name="name">File: Root unrestricted access</field>
       <field name="model_id" ref="model_cx_tower_file_template" />
       <field name="groups" eval="[(4, ref('cetmix_tower_server.group_root'))]" />
