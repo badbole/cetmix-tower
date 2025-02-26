@@ -21,8 +21,13 @@ class CxTowerPlan(models.Model):
     _inherit = [
         "cx.tower.reference.mixin",
         "cx.tower.access.mixin",
+        "cx.tower.access.role.mixin",
     ]
     _order = "name asc"
+
+    def _get_post_create_fields(self):
+        res = super()._get_post_create_fields()
+        return res + ["line_ids"]
 
     active = fields.Boolean(default=True)
     allow_parallel_run = fields.Boolean(
@@ -62,6 +67,14 @@ class CxTowerPlan(models.Model):
         compute_sudo=True,
     )
 
+    # ---- Access. Add relation for mixin fields
+    user_ids = fields.Many2many(
+        relation="cx_tower_plan_user_rel",
+    )
+    manager_ids = fields.Many2many(
+        relation="cx_tower_plan_manager_rel",
+    )
+
     def execute(self, servers, **kwargs):
         """Execute plans on multiple servers
 
@@ -94,9 +107,15 @@ class CxTowerPlan(models.Model):
             status (Int): plan execution status
         """
         self.ensure_one()
-        if len(server) > 1:
-            raise ValueError(_("_execute() function takes single server record only!"))
+        # Ensure we have a single server record
+        server.ensure_one()
 
+        # Check plan access before execution
+        # This is needed to avoid possible access violations
+        self.check_access_rights("read")
+        self.check_access_rule("read")
+
+        # Access log as root to bypass access restrictions
         plan_log_obj = self.env["cx.tower.plan.log"].sudo()
 
         # Check if the same plan is being executed on this server right now

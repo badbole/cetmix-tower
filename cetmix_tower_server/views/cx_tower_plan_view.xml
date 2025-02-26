@@ -74,7 +74,6 @@
                         <page name="plan_lines" string="Code">
                             <field name="line_ids">
                                 <tree decoration-bf="action=='plan'">
-                                    <field name="action" invisible="1"/> <!-- avoid group rights error-->
                                     <field name="sequence" widget="handle" />
                                     <field name="name" />
                                     <field name="reference" optional="hide" />
@@ -100,6 +99,26 @@
                                     />
                                 </tree>
                             </field>
+                        </page>
+                        <page
+                            name="access"
+                            string="Access"
+                            groups="cetmix_tower_server.group_manager"
+                        >
+                            <group name="access">
+                                <field
+                                    name="user_ids"
+                                    widget="many2many_tags"
+                                    placeholder="users who can view this record"
+                                    options="{'no_create': True}"
+                                />
+                                <field
+                                    name="manager_ids"
+                                    widget="many2many_tags"
+                                    placeholder="managers who can modify this record"
+                                    options="{'no_create': True}"
+                                />
+                            </group>
                         </page>
                     </notebook>
                 </sheet>

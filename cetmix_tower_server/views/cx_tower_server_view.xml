@@ -114,11 +114,10 @@
             name="inherit_id"
             ref="cetmix_tower_server.cx_tower_server_view_kanban"
         />
-        <!-- Inherited view cannot have 'Groups' define on the record. Use 'groups' attributes inside the view definition-->
-<!--        <field-->
-<!--            name="groups_id"-->
-<!--            eval="[(4, ref('cetmix_tower_server.group_manager'))]"-->
-<!--        />-->
+        <field
+            name="groups_id"
+            eval="[(4, ref('cetmix_tower_server.group_manager'))]"
+        />
         <field name="arch" type="xml">
             <xpath expr="//div[hasclass('o_kanban_primary_right')]" position="inside">
                 <div t-if="record.os_id.raw_value">
@@ -282,17 +281,14 @@
                                     <field
                                         name="server_template_id"
                                         attrs="{'invisible': [('server_template_id', '=', False)]}"
+                                        groups="cetmix_tower_server.group_manager"
                                     />
                                     <field name="plan_delete_id" />
                                 </group>
                                 <field name="note" placeholder="Put your notes here" />
                             </group>
                         </page>
-                        <page
-                            name="configuration"
-                            string="Configuration"
-                            groups="cetmix_tower_server.group_manager"
-                        >
+                        <page name="configuration" string="Configuration">
                             <field name="variable_value_ids" order="variable_reference">
                                 <tree editable="bottom">
                                     <field name="variable_reference" invisible="1" />
@@ -307,6 +303,7 @@
                                         options="{'no_create': True, 'no_create_edit': True}"
                                         attrs="{'readonly': [('variable_type', '=', 's')]}"
                                     />
+                                    <field name="access_level" optional="show" />
                                 </tree>
                                 <form>
                                     <group>
@@ -321,6 +318,7 @@
                                             widget="CopyClipboardChar"
                                             options="{'string': 'Copy value'}"
                                         />
+                                        <field name="access_level" />
                                     </group>
                                     <field
                                         name="note"
@@ -328,6 +326,26 @@
                                     />
                                 </form>
                             </field>
+                        </page>
+                        <page
+                            name="access"
+                            string="Access"
+                            groups="cetmix_tower_server.group_manager"
+                        >
+                            <group name="access">
+                                <field
+                                    name="user_ids"
+                                    widget="many2many_tags"
+                                    placeholder="users who can access this server"
+                                    options="{'no_create': True}"
+                                />
+                                <field
+                                    name="manager_ids"
+                                    widget="many2many_tags"
+                                    placeholder="managers who can modify this server"
+                                    options="{'no_create': True}"
+                                />
+                            </group>
                         </page>
                         <page
                             name="secrets"

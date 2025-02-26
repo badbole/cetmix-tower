@@ -63,7 +63,7 @@ class SSH(object):
         self.timeout = timeout
         # NB: allow_agent=False is for avoiding
         # ssh-agent related connection issues~
-        self.allow_agent = False  # allow_agent
+        self.allow_agent = allow_agent
 
         self._ssh = None
         self._sftp = None
@@ -261,6 +261,7 @@ class CxTowerServer(models.Model):
 
     _name = "cx.tower.server"
     _inherit = [
+        "cx.tower.access.role.mixin",
         "cx.tower.variable.mixin",
         "cx.tower.reference.mixin",
         "mail.thread",
@@ -268,6 +269,10 @@ class CxTowerServer(models.Model):
     ]
     _description = "Cetmix Tower Server"
     _order = "name asc"
+
+    def _get_post_create_fields(self):
+        res = super()._get_post_create_fields()
+        return res + ["variable_value_ids", "server_log_ids", "secret_ids"]
 
     # ---- Main
     active = fields.Boolean(default=True)
@@ -333,7 +338,7 @@ class CxTowerServer(models.Model):
         string="Secrets",
         comodel_name="cx.tower.key",
         inverse_name="server_id",
-        domain=[("key_type", "!=", "k")],
+        domain=[("key_type", "=", "s")],
     )
 
     # ---- Attributes
@@ -386,6 +391,15 @@ class CxTowerServer(models.Model):
         string="On Delete Plan",
         groups="cetmix_tower_server.group_manager",
         help="This Flightplan will be executed when the server is deleted",
+    )
+
+    # ---- Access. Add relation for mixin fields
+
+    user_ids = fields.Many2many(
+        relation="cx_tower_server_user_rel",
+    )
+    manager_ids = fields.Many2many(
+        relation="cx_tower_server_manager_rel",
     )
 
     def _selection_status(self):

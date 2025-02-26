@@ -28,6 +28,7 @@
                                 placeholder="Reference. Can contain English letters, digits and '_'. Leave blank to autogenerate"
                             />
                         </h3>
+                        <field name="active" invisible="1" />
                     </div>
                     <group>
                         <group>
@@ -67,6 +68,26 @@
                             attrs="{'invisible': ['|', ('file_type', '=', 'binary'), ('source', '=', 'server')]}"
                         >
                             <field name="code" nolabel="1" />
+                        </page>
+                        <page
+                            name="access"
+                            string="Access"
+                            groups="cetmix_tower_server.group_manager"
+                        >
+                            <group name="access">
+                                <field
+                                    name="user_ids"
+                                    widget="many2many_tags"
+                                    placeholder="users who can view this record"
+                                    options="{'no_create': True}"
+                                />
+                                <field
+                                    name="manager_ids"
+                                    widget="many2many_tags"
+                                    placeholder="managers who can modify this record"
+                                    options="{'no_create': True}"
+                                />
+                            </group>
                         </page>
                     </notebook>
                 </sheet>
@@ -112,6 +133,11 @@
                     name="filter_text"
                     string="Text"
                     domain="[('file_type', '=', 'text')]"
+                />
+                <filter
+                    string="Archived"
+                    name="archived"
+                    domain="[('active', '=', False)]"
                 />
                 <group expand="0" string="Group By">
                     <filter

@@ -13,6 +13,7 @@ class CxTowerFileTemplate(models.Model):
         "cx.tower.reference.mixin",
         "cx.tower.key.mixin",
         "cx.tower.template.mixin",
+        "cx.tower.access.role.mixin",
     ]
     _description = "Cx Tower File Template"
 
@@ -23,6 +24,7 @@ class CxTowerFileTemplate(models.Model):
         for template in self:
             template.file_count = len(template.file_ids)
 
+    active = fields.Boolean(default=True)
     file_name = fields.Char(
         help="Default full file name with file type for example: test.txt",
     )
@@ -64,7 +66,15 @@ class CxTowerFileTemplate(models.Model):
         column2="variable_id",
     )
 
-    @classmethod
+    # ---- Access. Add relation for mixin fields
+
+    user_ids = fields.Many2many(
+        relation="cx_tower_file_template_user_rel",
+    )
+    manager_ids = fields.Many2many(
+        relation="cx_tower_file_template_manager_rel",
+    )
+
     def _get_depends_fields(cls):
         """
         Define dependent fields for computing
