@@ -6,7 +6,8 @@
         <field name="arch" type="xml">
             <form string="Run Plan">
                 <group>
-                     <field name="show_servers" invisible="1" />
+
+                    <field name="show_servers" invisible="1" />
                     <field
                         name="server_ids"
                         widget="many2many_tags"
@@ -38,6 +39,7 @@
                     />
                     <field name="plan_line_ids">
                         <tree decoration-bf="action=='plan'">
+                            <field name="action" invisible="1" help="BOLE: avoid groups permissions"/>
                             <field name="name" />
                             <field
                                 name="action"
