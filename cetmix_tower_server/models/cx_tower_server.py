@@ -341,6 +341,7 @@ class CxTowerServer(models.Model):
         comodel_name="cx.tower.key",
         inverse_name="server_id",
         domain=[("key_type", "=", "s")],
+        groups="cetmix_tower_server.group_manager",
     )
 
     # ---- Attributes
@@ -613,8 +614,16 @@ class CxTowerServer(models.Model):
             Char: SSH private key
         """
         self.ensure_one()
+        # To ensure that key will be read
+        # regardless of access rights
+        self = self.sudo()
         if self.ssh_key_id:
-            ssh_key = self.ssh_key_id.sudo().secret_value
+            # Use context key to read secret value
+            ssh_key = (
+                self.ssh_key_id.sudo()
+                .with_context(show_secret_value=True)
+                .read(["secret_value"])[0]["secret_value"]
+            )
         else:
             ssh_key = None
         return ssh_key
@@ -899,6 +908,19 @@ class CxTowerServer(models.Model):
             dict(): command execution result if `no_log` context value == True else None
         """
         self.ensure_one()
+
+        # Check if command can be run on this server:
+        # 1. Server is listed in command's server_ids
+        # 2. There are no server_ids at all (command is not server specific)
+        if command.server_ids and self.id not in [s.id for s in command.server_ids]:
+            raise ValidationError(
+                _(
+                    "Command '%(cmd)s' is not compatible with the server '%(server)s'.",
+                    cmd=command.name,
+                    server=self.name,
+                )  # pylint: disable=no-member
+            )
+
         # Populate `sudo` value from the server settings if not provided explicitly
         if sudo is None:
             if self.sudo().ssh_username != "root" and self.sudo().use_sudo:
@@ -1272,7 +1294,9 @@ class CxTowerServer(models.Model):
             }
             # add executed command with action "plan" to save link to plan log
             kwargs["flight_plan_command_log"] = log_record
-            plan_status = flight_plan.with_context()._execute_single(self, **kwargs)
+            plan_status = flight_plan.with_context(from_command=True)._execute_single(
+                self, **kwargs
+            )
         except Exception as e:
             if raise_on_error:
                 raise ValidationError(

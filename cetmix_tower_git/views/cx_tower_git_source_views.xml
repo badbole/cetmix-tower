@@ -79,17 +79,5 @@
             </form>
         </field>
     </record>
-<record id="cx_tower_git_source_action" model="ir.actions.act_window">
-        <field name="name">Git Sources</field>
-        <field name="res_model">cx.tower.git.source</field>
-        <field name="view_mode">tree,form</field>
-    </record>
 
-    <menuitem
-        id="menu_cx_tower_git_source"
-        name="Git Sources"
-        action="cx_tower_git_source_action"
-        sequence="11"
-        parent="cetmix_tower_server.menu_tools"
-    />
     </odoo>

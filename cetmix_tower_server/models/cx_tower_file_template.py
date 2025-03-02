@@ -67,7 +67,6 @@ class CxTowerFileTemplate(models.Model):
     )
 
     # ---- Access. Add relation for mixin fields
-
     user_ids = fields.Many2many(
         relation="cx_tower_file_template_user_rel",
         domain=lambda self: [

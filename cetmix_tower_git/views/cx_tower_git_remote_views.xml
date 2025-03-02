@@ -63,17 +63,5 @@
             </form>
         </field>
     </record>
-<record id="cx_tower_git_remote_action" model="ir.actions.act_window">
-        <field name="name">Git Remotes</field>
-        <field name="res_model">cx.tower.git.remote</field>
-        <field name="view_mode">tree,form</field>
-    </record>
 
-    <menuitem
-        id="menu_cx_tower_git_remote"
-        name="Git remotes"
-        action="cx_tower_git_remote_action"
-        sequence="12"
-        parent="cetmix_tower_server.menu_tools"
-    />
     </odoo>
