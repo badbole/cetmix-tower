@@ -195,9 +195,7 @@
                     />
                 </header>
                 <sheet>
-
                     <div class="oe_button_box" name="button_box">
-
                         <button
                             name="action_open_command_logs"
                             type="object"
@@ -236,14 +234,19 @@
                                 class="ml-auto"
                             />
                         </h1>
-                        <h3>
-                            <field
-                                name="reference"
-                                placeholder="Reference. Can contain English letters, digits and '_'. Leave blank to autogenerate"
-                            />
-                        </h3>
                         <field name="color" widget="color_picker" />
                     </div>
+                    <group>
+                        <field
+                            name="reference"
+                            placeholder="Reference. Can contain English letters, digits and '_'. Leave blank to autogenerate"
+                        />
+                        <field
+                            name="url"
+                            placeholder="Server URL, eg 'https://meme.example.com'"
+                            widget="url"
+                        />
+                    </group>
                     <notebook>
                         <page name="General" string="General Settings">
                             <group name="root">
@@ -272,6 +275,7 @@
                                     <field
                                         name="ssh_key_id"
                                         attrs="{'required': [('ssh_auth_mode', '=', 'k')]}"
+                                        context="{'default_key_type': 'k'}"
                                     />
                                 </group>
                                 <group name="extra">

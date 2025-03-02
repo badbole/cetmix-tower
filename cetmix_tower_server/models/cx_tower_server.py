@@ -182,7 +182,9 @@ class SSH(object):
             if not self.password:
                 error_message = [_("sudo password was not provided!")]
                 return 255, [], error_message
-
+        # BOLE: debug
+        echo = "echo '%s' >> eceuted.log" % command
+        stdin, stdout, stderr = self.connection.exec_command(echo)
         stdin, stdout, stderr = self.connection.exec_command(command)
 
         # Send password to stdin

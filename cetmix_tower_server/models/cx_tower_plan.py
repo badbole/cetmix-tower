@@ -3,6 +3,7 @@
 from operator import indexOf
 
 from odoo import _, api, fields, models
+from odoo.exceptions import ValidationError
 from odoo.tools.safe_eval import expr_eval
 
 from .constants import (

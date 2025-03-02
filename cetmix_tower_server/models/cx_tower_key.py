@@ -12,7 +12,7 @@ class CxTowerKey(models.Model):
 
     _name = "cx.tower.key"
     _description = "Cetmix Tower private key storage"
-    _inherit = ["cx.tower.reference.mixin"]
+    _inherit = ["cx.tower.reference.mixin", "cx.tower.access.role.mixin"]
 
     KEY_PREFIX = "#!cxtower"
     KEY_TERMINATOR = "!#"
