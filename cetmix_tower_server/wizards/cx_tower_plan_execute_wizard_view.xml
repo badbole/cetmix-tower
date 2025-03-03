@@ -45,6 +45,7 @@
                     />
                     <field name="plan_line_ids">
                         <tree decoration-bf="action=='plan'">
+                            <field  name="action" invisible="1"/><!--Field 'action' used in decoration-bf=action=='plan' is restricted to the group(s) cetmix_tower_server.group_manager.-->
                             <field name="name" />
                             <field
                                 name="action"
