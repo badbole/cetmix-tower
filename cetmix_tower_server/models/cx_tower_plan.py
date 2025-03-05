@@ -111,6 +111,24 @@ class CxTowerPlan(models.Model):
         # Ensure we have a single server record
         server.ensure_one()
 
+        # Check if flight plan can be run on this server:
+        # 1. Server is listed in command's server_ids
+        # 2. There are no server_ids at all (command is not server specific)
+        # This check is skipped if 'from_command' context key is set to True
+        if (
+            not self.env.context.get("from_command")
+            and self.server_ids
+            and server.id not in [s.id for s in self.server_ids]
+        ):
+            raise ValidationError(
+                _(
+                    "Flight plan '%(plan)s' is not compatible with"
+                    " the server '%(server)s'.",
+                    plan=self.name,
+                    server=server.name,
+                )  # pylint: disable=no-member
+            )
+
         # Check plan access before execution
         # This is needed to avoid possible access violations
         self.check_access_rights("read")

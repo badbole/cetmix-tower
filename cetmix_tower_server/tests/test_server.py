@@ -1,4 +1,4 @@
-from odoo.exceptions import AccessError
+from odoo.exceptions import AccessError, ValidationError
 
 from .common import TestTowerCommon
 
