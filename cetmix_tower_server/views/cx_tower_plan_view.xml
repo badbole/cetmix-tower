@@ -75,7 +75,8 @@
                             <field name="line_ids">
                                 <tree decoration-bf="action=='plan'">
                                     <field name="action" invisible="1"
-                                           help="BOLE: Field 'action' used in decoration-bf=action=='plan' is restricted to the group(s) cetmix_tower_server.group_manager."/>
+                                           help="Field 'action' used in decoration-bf=action=='plan' is restricted to the group(s) cetmix_tower_server.group_manager."/>
+"
                                     <field name="sequence" widget="handle" />
                                     <field name="name" />
                                     <field name="reference" optional="hide" />

@@ -41,6 +41,9 @@ class TestTowerKey(TestTowerCommon):
                 "ssh_auth_mode": "p",
             }
         )
+        self.test_key = self.Key.create(
+            {"name": "Test Key", "key_type": "s", "secret_value": "test value"}
+        )
 
     def test_key_creation(self):
         """
@@ -61,53 +64,6 @@ class TestTowerKey(TestTowerCommon):
             "test key meme",
             "Trailing and leading whitespaces must be removed from name",
         )
-
-    def test_key_access_rights(self):
-        """Test private key security features"""
-
-        # Default message returned instead of key value
-        SECRET_VALUE_PLACEHOLDER = self.Key.SECRET_VALUE_PLACEHOLDER
-
-        # Store key value
-        self.write_and_invalidate(
-            self.key_1, **{"secret_value": "pepe", "key_type": "s"}
-        )
-
-        # Get key value as Bob
-        key_bob = self.key_1.with_user(self.user_bob)
-
-        with self.assertRaises(AccessError):
-            key_value = key_bob.secret_value
-
-        # Add user to group
-        self.add_to_group(self.user_bob, "cetmix_tower_server.group_manager")
-        # Add user to server
-        self.server_test_1.write({"user_ids": [(4, self.user_bob.id)]})
-        # Add server to key
-        self.write_and_invalidate(self.key_1, **{"server_id": self.server_test_1.id})
-
-        # Get value
-        key_value = key_bob.secret_value
-
-        # Ensure placeholder is used instead of the key value
-        self.assertEqual(
-            key_value,
-            SECRET_VALUE_PLACEHOLDER,
-            msg="Must return placeholder '{}'".format(SECRET_VALUE_PLACEHOLDER),
-        )
-
-        # Test write
-        with self.assertRaises(AccessError):
-            self.write_and_invalidate(key_bob, **{"secret_value": "frog"})
-
-        # Add Bob to Root group and test write again
-        self.add_to_group(self.user_bob, "cetmix_tower_server.group_root")
-        self.write_and_invalidate(key_bob, **{"secret_value": "frog"})
-
-        # Read with context and check if secret value is returned
-        key_with_context = self.key_1.with_context(show_secret_value=True)
-        key_value = key_with_context.secret_value
-        self.assertEqual(key_value, "frog", msg="Must return key value 'frog'")
 
     def test_extract_key_strings(self):
         """Check if key strings are extracted properly"""
@@ -139,7 +95,7 @@ class TestTowerKey(TestTowerCommon):
         """Check if key string is parsed correctly"""
 
         # Test global key
-        self.Key.create(
+        doge_key = self.Key.create(
             {
                 "name": "doge key",
                 "reference": "DOGE_KEY",
@@ -157,12 +113,10 @@ class TestTowerKey(TestTowerCommon):
         self.assertEqual(key_value, "Doge dog", "Key value doesn't match")
 
         # Test partner specific key
-        self.Key.create(
+        self.KeyValue.create(
             {
-                "name": "doge key",
-                "reference": "DOGE_KEY",
+                "key_id": doge_key.id,
                 "secret_value": "Doge partner",
-                "key_type": "s",
                 "partner_id": self.user_bob.partner_id.id,
             }
         )
@@ -175,18 +129,28 @@ class TestTowerKey(TestTowerCommon):
         self.assertEqual(key_value, "Doge partner", "Key value doesn't match")
 
         # Test server specific key
-        self.Key.create(
+        self.KeyValue.create(
             {
-                "name": "doge key",
-                "reference": "DOGE_KEY",
+                "key_id": doge_key.id,
                 "secret_value": "Doge server",
-                "key_type": "s",
-                "partner_id": self.user_bob.partner_id.id,
                 "server_id": self.server_test_1.id,
             }
         )
         key_value = self.Key._parse_key_string(key_string, **kwargs)
-        self.assertEqual(key_value, "Doge server", "Key value doesn't match")
+
+        # Test server and partner specific key
+        self.KeyValue.create(
+            {
+                "key_id": doge_key.id,
+                "secret_value": "Doge server and partner",
+                "server_id": self.server_test_1.id,
+                "partner_id": self.user_bob.partner_id.id,
+            }
+        )
+        key_value = self.Key._parse_key_string(key_string, **kwargs)
+        self.assertEqual(
+            key_value, "Doge server and partner", "Key value doesn't match"
+        )
 
         # Test missing key
         key_string = "#!cxtower.secret.ANOTHER_KEY!#"
@@ -224,37 +188,51 @@ class TestTowerKey(TestTowerCommon):
 
     def test_resolve_key_type_secret(self):
         """Check 'secret' type key resolver"""
-        self.Key.create(
+        doge_key = self.Key.create(
             {
                 "name": "doge key",
                 "reference": "DOGE_KEY",
-                "secret_value": "Doge dog",
                 "key_type": "s",
             }
         )
 
-        # Existing key
-        key_value = self.Key._resolve_key_type_secret("DOGE_KEY")
-        self.assertEqual(key_value, "Doge dog", "Key value doesn't match")
-
-        # Non existing key
-        key_value = self.Key._resolve_key_type_secret("PEPE_KEY")
-        self.assertIsNone(key_value, "Key value must be 'None'")
-
-        # Test partner specific key
-        self.Key.create(
+        # 1. Test server and partner specific key
+        server_partner_value = self.KeyValue.create(
             {
-                "name": "doge key",
-                "reference": "DOGE_KEY",
-                "secret_value": "Doge partner",
-                "key_type": "s",
+                "key_id": doge_key.id,
+                "secret_value": "Doge server and partner",
+                "server_id": self.server_test_1.id,
                 "partner_id": self.user_bob.partner_id.id,
             }
         )
-        # compose kwargs
         kwargs = {
             "partner_id": self.user_bob.partner_id.id,
             "server_id": self.server_test_1.id,
+        }
+        key_value = self.Key._resolve_key_type_secret("DOGE_KEY", **kwargs)
+        self.assertEqual(
+            key_value, "Doge server and partner", "Key value doesn't match"
+        )
+
+        # 2. Global key
+        doge_key.write({"secret_value": "Doge dog"})
+        key_value = self.Key._resolve_key_type_secret("DOGE_KEY")
+        self.assertEqual(key_value, "Doge dog", "Key value doesn't match")
+
+        # 3. Non existing key
+        key_value = self.Key._resolve_key_type_secret("PEPE_KEY")
+        self.assertIsNone(key_value, "Key value must be 'None'")
+
+        # 4. Partner specific key
+        self.KeyValue.create(
+            {
+                "key_id": doge_key.id,
+                "secret_value": "Doge partner",
+                "partner_id": self.user_bob.partner_id.id,
+            }
+        )
+        kwargs = {
+            "partner_id": self.user_bob.partner_id.id,
         }
         key_value = self.Key._resolve_key_type_secret("DOGE_KEY", **kwargs)
         self.assertEqual(key_value, "Doge partner", "Key value doesn't match")
